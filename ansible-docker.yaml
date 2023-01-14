@@ -1,0 +1,161 @@
+---
+- name: Установка и настройка стека приложений в контейнерах Docker
+  hosts: all
+  become: yes
+  vars:
+    php_version: 7.2
+    network_name: mynetwork # имя сети для контейнеров
+    nginx_image: nginx:1.17-alpine
+    apache_image: httpd:2.4-alpine
+    node_exporter_image: prom/node-exporter:latest
+    nginx_exporter_image: prom/nginx-exporter:latest
+    mysql_exporter_image: prom/mysqld-exporter:latest
+    cadvisor_image: google/cadvisor:latest
+    prometheus_image: prom/prometheus:latest
+    grafana_image: grafana/grafana:latest
+    fluentd_image: fluent/fluentd:latest
+    mysql_image: mysql:5.7-alpine
+    nginx_conf_path: /srv/nginx/conf # путь к конфигурационным файлам nginx
+    nginx_log_path: /srv/nginx/logs # путь к логам nginx
+    apache_conf_path: /srv/apache/conf # путь к конфигурационным файлам apache
+    apache_log_path: /srv/apache/logs # путь к логам apache
+    mysql_conf_path: /srv/mysql/conf # путь к конфигурационным файлам mysql
+    mysql_log_path: /srv/mysql/logs # путь к логам mysql
+    www_path: /srv/www/html # путь к контенту
+  tasks:
+    - name: Установка Docker
+      package:
+        name: docker
+        state: latest
+
+    - name: Создание сети Docker
+      docker_network:
+        name: "{{ network_name }}"
+        driver: bridge
+
+- name: Создание кастомного образа Nginx с поддержкой GeoIP модуля
+  docker_image:
+    path: .
+    name: "{{ nginx_image }}-geoip"
+    buildargs:
+      PHP_VERSION: "{{ php_version }}"
+      
+- name: Запуск Nginx контейнера
+  docker_container:
+    name: nginx
+    image: "{{ nginx_image }}-geoip"
+    network_mode: "{{ network_name }}"
+    ports:
+      - "80:80"
+    volumes:
+      - "{{ nginx_conf_path }}:/etc/nginx/conf.d"
+      - "{{ nginx_log_path }}:/var/log/nginx"
+      - "{{ www_path }}:/usr/share/nginx/html"
+      
+- name: Запуск Apache контейнеров
+  docker_container:
+    name: "{{ item }}"
+    image: "{{ apache_image }}"
+    network_mode: "{{ network_name }}"
+    volumes:
+      - "{{ apache_conf_path }}:/usr/local/apache2/conf"
+      - "{{ apache_log_path }}:/usr/local/apache2/logs"
+      - "{{ www_path }}:/usr/local/apache2/htdocs"
+    ports:
+      - "80:80"
+    with_items:
+      - apache1
+      - apache2
+      
+- name: Запуск Node Exporter контейнера
+  docker_container:
+    name: node_exporter
+    image: "{{ node_exporter_image }}"
+    network_mode: "{{ network_name }}"
+    ports:
+      - "9100:9100"
+      
+- name: Запуск Nginx Exporter контейнера
+  docker_container:
+    name: nginx_exporter
+    image: "{{ nginx_exporter_image }}"
+    network_mode: "{{ network_name }}"
+    ports:
+      - "9113:9113"
+      
+- name: Запуск MySQL Exporter контейнера
+  docker_container:
+    name: mysql_exporter
+    image: "{{ mysql_exporter_image }}"
+    network_mode: "{{ network_name }}"
+    ports:
+      - "9104:9104"
+      
+- name: Запуск Cadvisor контейнера
+  docker_container:
+    name: cadvisor
+    image: "{{ cadvisor_image }}"
+    network_mode: "{{ network_name }}"
+    ports: 
+      - "8080:8080"
+
+- name: Запуск Prometheus контейнера
+  docker_container:
+    name: prometheus
+    image: "{{ prometheus_image }}"
+    network_mode: "{{ network_name }}"
+    volumes:
+      - "{{ prometheus_conf_path }}:/etc/prometheus"
+    ports:
+      - "9090:9090"
+      
+- name: Запуск Grafana контейнера
+  docker_container:
+    name: grafana
+    image: "{{ grafana_image }}"
+    network_mode: "{{ network_name }}"
+    ports:
+      - "3000:3000"
+      
+- name: Запуск Fluentd контейнера
+  docker_container:
+    name: fluentd
+    image: "{{ fluentd_image }}"
+    network_mode: "{{ network_name }}"
+    volumes:
+      - "{{ fluentd_conf_path }}:/fluentd/etc"
+    ports:
+      - "24224:24224"
+      
+- name: Запуск MySQL контейнера
+  docker_container:
+    name: mysql
+    image: "{{ mysql_image }}"
+    network_mode: "{{ network_name }}"
+    volumes:
+      - "{{ mysql_conf_path }}:/etc/mysql"
+      - "{{ mysql_log_path }}:/var/log/mysql"
+    ports:
+      - "3306:3306"
+
+- name: Кастомный формат логов Nginx
+  template:
+    src: "nginx_log_format.conf.j2"
+    dest: "{{ nginx_conf_path }}/nginx_log_format.conf"
+
+- name: Перезагрузить Nginx
+  shell: docker exec nginx nginx -s reload
+
+- name: Скопировать конфигурационные файлы в места назначения
+  synchronize:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "{{ nginx_conf_path }}", dest: "/etc/nginx/conf.d" }
+    - { src: "{{ apache_conf_path }}", dest: "/usr/local/apache2/conf" }
+    - { src: "{{ mysql_conf_path }}", dest: "/etc/mysql" }
+    - { src: "{{ prometheus_conf_path }}", dest: "/etc/prometheus" }
+    - { src: "{{ fluentd_conf_path }}", dest: "/fluentd/etc" }
+    
+- name: Проверить, что все контейнеры работают
+  shell: docker ps
