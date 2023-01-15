@@ -1,162 +1,161 @@
----
-- hosts: all
-  vars:
-    nginx_image: nginx:alpine
-    apache_image: httpd:alpine
-    node_exporter_image: prom/node-exporter:latest
-    nginx_exporter_image: quay.io/prometheus/nginx-exporter:latest
-    mysql_exporter_image: quay.io/prometheus/mysqld-exporter:latest
-    cadvisor_image: google/cadvisor:latest
-    prometheus_image: prom/prometheus:latest
-    grafana_image: grafana/grafana:latest
-    fluentd_image: fluent/fluentd:latest
-    mysql_image: mysql:latest
+- name: Install and configure Docker on Debian 11.6 minimal
+  hosts: all
+  become: yes
   tasks:
-    - name: Update package index
-      # Обновляем индекс пакетов
-      apt:
-        update_cache: yes
-
     - name: Install Docker
-      # Устанавливаем Docker
       apt:
         name: docker.io
         state: present
-      
-    - name: Create Docker network
-      # Создаем сеть для докер контейнеров
-      docker_network:
-        name: stack_network
-        driver: bridge
-        subnet: 10.0.0.0/24
-        gateway: 10.0.0.1
-
-    - name: Start Nginx container
-      # Запускаем контейнер с Nginx
-      docker_container:
-        name: nginx
-        image: "{{ nginx_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "./nginx/conf:/etc/nginx/conf.d"
-          - "./nginx/logs:/var/log/nginx"
-        ports:
-          - "80:80"
-        env:
-          - GEOIP_ENABLED=1
-        log_driver: "json-file"
-        log_opt:
-          max-size: "100m"
-          max-file: "3"
-		  
-    - name: Start Apache container
-      # Запускаем 2 контейнера с Apache
-      docker_container:
-        name: apache1
-        image: "{{ apache_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "./apache/conf:/usr/local/apache2/conf"
-          - "./apache/logs:/usr/local/apache2/logs"
-        ports:
-          - "81:80"
-      
-    - name: Start Apache container
-      docker_container:
-        name: apache2
-        image: "{{ apache_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "./apache/conf:/usr/local/apache2/conf"
-          - "./apache/logs:/usr/local/apache2/logs"
-      ports:
-        - "82:80"
-      
-    - name: Start Node Exporter container
-      # Запускаем контейнер с Node Exporter
-      docker_container:
-        name: node_exporter
-        image: "{{ node_exporter_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "/proc:/host/proc:ro"
-          - "/sys:/host/sys:ro"
-          - "/:/rootfs:ro"
-      
-    - name: Start Nginx Exporter container
-      # Запускаем контейнер 
-	  docker_container:
-        name: nginx_exporter
-        image: "{{ nginx_exporter_image }}"
-        network_mode: "stack_network"
-        ports:
-          - "9113:9113"
-        command: -nginx.scrape_uri=http://nginx:80/stub_status
-    
-    - name: Start MySQL Exporter container
-      # Запускаем контейнер с MySQL Exporter
-      docker_container:
-        name: mysql_exporter
-        image: "{{ mysql_exporter_image }}"
-        network_mode: "stack_network"
-        ports:
-          - "9104:9104"
-        command: --config.my-cnf=/etc/mysql/my.cnf
-    
-    - name: Start cAdvisor container
-      # Запускаем контейнер с cAdvisor
-      docker_container:
-        name: cadvisor
-        image: "{{ cadvisor_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "/:/rootfs:ro"
-          - "/var/run:/var/run:rw"
-          - "/sys:/sys:ro"
-          - "/var/lib/docker/:/var/lib/docker:ro"
-        ports:
-          - "8080:8080"
-      
-    - name: Start Prometheus container
-      # Запускаем контейнер с Prometheus
-      docker_container:
-        name: prometheus
-        image: "{{ prometheus_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "./prometheus/conf:/etc/prometheus"
-          - "./prometheus/data:/prometheus"
-      ports:
-        - "9090:9090"
-      
-    - name: Start Grafana container
-      # Запускаем контейнер с Grafana
-	  docker_container:
-        name: grafana
-        image: "{{ grafana_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "./grafana/conf:/etc/grafana"
-          - "./grafana/data:/var/lib/grafana"
-        ports:
-          - "3000:3000"
-      
-    - name: Start Fluentd container
-      # Запускаем контейнер с Fluentd
-      docker_container:
-        name: fluentd
-        image: "{{ fluentd_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "./fluentd/conf:/fluentd/etc"
-          - "./fluentd/logs:/fluentd/log"
-      
-    - name: Start MySQL container
-      # Запускаем контейнер с MySQL
-      docker_container:
-        name: mysql
-        image: "{{ mysql_image }}"
-        network_mode: "stack_network"
-        volumes:
-          - "./mysql/conf:/etc/mysql"
-          - "./mysql/data:/var/lib/mysql"
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+    - name: Create custom Docker network
+      command: docker network create --subnet=10.0.0.0/24 custom_network
+    - name: Pull and run Nginx container
+      command: docker run --name nginx --net custom_network --ip 10.0.0.2 -p 80:80 nginx:alpine
+    - name: Pull and run Apache container
+      command: docker run --name apache1 --net custom_network --ip 10.0.0.3 -p 8080:80 httpd:2.4-alpine
+    - name: Pull and run second Apache container
+      command: docker run --name apache2 --net custom_network --ip 10.0.0.4 -p 8081:80 httpd:2.4-alpine
+    - name: Pull and run Node exporter container
+      command: docker run --name node_exporter --net custom_network --ip 10.0.0.5 prom/node-exporter
+    - name: Pull and run Nginx exporter container
+      command: docker run --name nginx_exporter --net custom_network --ip 10.0.0.6 quay.io/prometheus/nginx-exporter
+    - name: Pull and run MySQL exporter container
+      command: docker run --name mysql_exporter --net custom_network --ip 10.0.0.7 prom/mysqld-exporter
+    - name: Pull and run Cadvisor container
+      command: docker run --name cadvisor --net custom_network --ip 10.0.0.8 google/cadvisor
+    - name: Pull and run Prometheus container
+      command: docker run --name prometheus --net custom_network --ip 10.0.0.9 prom/prometheus
+    - name: Pull and run Grafana container
+      command: docker run --name grafana --net custom_network --ip 10.0.0.10 grafana/grafana
+    - name: Pull and run Fluentd container
+      command: docker run --name fluentd --net custom_network --ip 10.0.0.11 fluent/fluentd
+    - name: Pull and run MySQL container
+      command: docker run --name mysql --net custom_network --ip 10.0.0.12 -e MYSQL_ROOT_PASSWORD=password mysql:5.7
+    - name: Create necessary directories and configs
+      file:
+        path: /srv/nginx/conf
+        state: directory
+      file:
+        path: /srv/nginx/logs
+        state: directory
+      file:
+        path: /srv/apache/conf
+        state: directory
+      file:
+        path: /srv/apache/logs
+        state: directory
+      file:
+        path: /srv/mysql/conf
+        state: directory
+      file:
+        path: /srv/mysql/logs
+        state: directory
+      file:
+        path: /srv/www/html
+        state: directory
+    - name: Create custom Nginx log format
+      lineinfile:
+        path: /srv/nginx/conf/nginx.conf
+        line: 'log_format custom_format '
+        line: '"$time_local $request_time $upstream_time $remote_addr $remote_user $time_local $request $status $body_bytes_sent $http_referer $http_user_agent $geoip_country_code";'
+    - name: Create DNS records
+      lineinfile:
+        path: /etc/hosts
+        line: '10.0.0.2 first.tst'
+        line: '10.0.0.2 second.tst'
+    - name: Create Node exporter config
+      lineinfile:
+        path: /srv/node_exporter/conf/node_exporter.yml
+        line: 'scrape_configs:'
+        line: '  - job_name: "node_exporter"'
+        line: '    static_configs:'
+        line: '      - targets: ["10.0.0.5:9100"]'
+    - name: Configure MySQL
+      command: mysql_secure_installation
+      args:
+        prompt:
+          - "Enter current password for root (enter for none):"
+          - "Set root password? [Y/n]"
+          - "Remove anonymous users? [Y/n]"
+          - "Disallow root login remotely? [Y/n]"
+          - "Remove test database and access to it? [Y/n]"
+          - "Reload privilege tables now? [Y/n]"
+        answer:
+          - ""
+          - "Y"
+          - "Y"
+          - "Y"
+          - "Y"
+          - "Y"
+    - name: Create test database
+      command: mysql -u root -p -e "CREATE DATABASE test_db;"
+    - name: Create database user
+      command: mysql -u root -p -e "CREATE USER 'test_user'@'localhost' IDENTIFIED BY 'password';"
+    - name: Mount volumes
+      mount:
+        path: /srv/nginx/conf
+        src: /var/lib/docker/volumes/nginx_conf
+        fstype: none
+        opts: bind
+      mount:
+        path: /srv/nginx/logs
+        src: /var/lib/docker/volumes/nginx_logs
+        fstype: none
+        opts: bind
+      mount:
+        path: /srv/apache/conf
+        src: /var/lib/docker/volumes/apache_conf
+        fstype: none
+        opts: bind
+      mount:
+        path: /srv/apache/logs
+        src: /var/lib/docker/volumes/apache_logs
+        fstype: none
+        opts: bind
+      mount:
+        path: /srv/mysql/conf
+        src: /var/lib/docker/volumes/mysql_conf
+        fstype: none
+        opts: bind
+      mount:
+        path: /srv/mysql/logs
+        src: /var/lib/docker/volumes/mysql_logs
+        fstype: none
+        opts: bind
+      mount:
+        path: /srv/www/html
+        src: /var/lib/docker/volumes/www_html
+        fstype: none
+        opts: bind
+    - name: Restart Docker service
+      service:
+        name: docker
+        state: restarted
+        enabled: true
+    - name: Restart Nginx container
+      command: docker restart nginx
+    - name: Restart Apache containers
+      command: docker restart apache1
+      command: docker restart apache2
+    - name: Restart Node exporter container
+      command: docker restart node_exporter
+    - name: Restart Nginx exporter container
+      command: docker restart nginx_exporter
+    - name: Restart MySQL exporter container
+      command: docker restart mysql_exporter
+    - name: Restart Cadvisor container
+      command: docker restart cadvisor
+    - name: Restart Prometheus container
+      command: docker restart prometheus
+    - name: Restart Grafana container
+      command: docker restart grafana
+    - name: Restart Fluentd container
+      command: docker restart fluentd
+    - name: Restart MySQL container
+      command: docker restart mysql
+    - name: Check if all containers are running
+      command: docker ps
