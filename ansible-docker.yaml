@@ -1,161 +1,162 @@
 ---
-- name: Установка и настройка стека приложений в контейнерах Docker
-  hosts: all
-  become: yes
+- hosts: all
   vars:
-    php_version: 7.2
-    network_name: mynetwork # имя сети для контейнеров
-    nginx_image: nginx:1.17-alpine
-    apache_image: httpd:2.4-alpine
+    nginx_image: nginx:alpine
+    apache_image: httpd:alpine
     node_exporter_image: prom/node-exporter:latest
-    nginx_exporter_image: prom/nginx-exporter:latest
-    mysql_exporter_image: prom/mysqld-exporter:latest
+    nginx_exporter_image: quay.io/prometheus/nginx-exporter:latest
+    mysql_exporter_image: quay.io/prometheus/mysqld-exporter:latest
     cadvisor_image: google/cadvisor:latest
     prometheus_image: prom/prometheus:latest
     grafana_image: grafana/grafana:latest
     fluentd_image: fluent/fluentd:latest
-    mysql_image: mysql:5.7-alpine
-    nginx_conf_path: /srv/nginx/conf # путь к конфигурационным файлам nginx
-    nginx_log_path: /srv/nginx/logs # путь к логам nginx
-    apache_conf_path: /srv/apache/conf # путь к конфигурационным файлам apache
-    apache_log_path: /srv/apache/logs # путь к логам apache
-    mysql_conf_path: /srv/mysql/conf # путь к конфигурационным файлам mysql
-    mysql_log_path: /srv/mysql/logs # путь к логам mysql
-    www_path: /srv/www/html # путь к контенту
+    mysql_image: mysql:latest
   tasks:
-    - name: Установка Docker
-      package:
-        name: docker
-        state: latest
+    - name: Update package index
+      # Обновляем индекс пакетов
+      apt:
+        update_cache: yes
 
-    - name: Создание сети Docker
+    - name: Install Docker
+      # Устанавливаем Docker
+      apt:
+        name: docker.io
+        state: present
+      
+    - name: Create Docker network
+      # Создаем сеть для докер контейнеров
       docker_network:
-        name: "{{ network_name }}"
+        name: stack_network
         driver: bridge
+        subnet: 10.0.0.0/24
+        gateway: 10.0.0.1
 
-- name: Создание кастомного образа Nginx с поддержкой GeoIP модуля
-  docker_image:
-    path: .
-    name: "{{ nginx_image }}-geoip"
-    buildargs:
-      PHP_VERSION: "{{ php_version }}"
+    - name: Start Nginx container
+      # Запускаем контейнер с Nginx
+      docker_container:
+        name: nginx
+        image: "{{ nginx_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "./nginx/conf:/etc/nginx/conf.d"
+          - "./nginx/logs:/var/log/nginx"
+        ports:
+          - "80:80"
+        env:
+          - GEOIP_ENABLED=1
+        log_driver: "json-file"
+        log_opt:
+          max-size: "100m"
+          max-file: "3"
+		  
+    - name: Start Apache container
+      # Запускаем 2 контейнера с Apache
+      docker_container:
+        name: apache1
+        image: "{{ apache_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "./apache/conf:/usr/local/apache2/conf"
+          - "./apache/logs:/usr/local/apache2/logs"
+        ports:
+          - "81:80"
       
-- name: Запуск Nginx контейнера
-  docker_container:
-    name: nginx
-    image: "{{ nginx_image }}-geoip"
-    network_mode: "{{ network_name }}"
-    ports:
-      - "80:80"
-    volumes:
-      - "{{ nginx_conf_path }}:/etc/nginx/conf.d"
-      - "{{ nginx_log_path }}:/var/log/nginx"
-      - "{{ www_path }}:/usr/share/nginx/html"
+    - name: Start Apache container
+      docker_container:
+        name: apache2
+        image: "{{ apache_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "./apache/conf:/usr/local/apache2/conf"
+          - "./apache/logs:/usr/local/apache2/logs"
+      ports:
+        - "82:80"
       
-- name: Запуск Apache контейнеров
-  docker_container:
-    name: "{{ item }}"
-    image: "{{ apache_image }}"
-    network_mode: "{{ network_name }}"
-    volumes:
-      - "{{ apache_conf_path }}:/usr/local/apache2/conf"
-      - "{{ apache_log_path }}:/usr/local/apache2/logs"
-      - "{{ www_path }}:/usr/local/apache2/htdocs"
-    ports:
-      - "80:80"
-    with_items:
-      - apache1
-      - apache2
+    - name: Start Node Exporter container
+      # Запускаем контейнер с Node Exporter
+      docker_container:
+        name: node_exporter
+        image: "{{ node_exporter_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "/proc:/host/proc:ro"
+          - "/sys:/host/sys:ro"
+          - "/:/rootfs:ro"
       
-- name: Запуск Node Exporter контейнера
-  docker_container:
-    name: node_exporter
-    image: "{{ node_exporter_image }}"
-    network_mode: "{{ network_name }}"
-    ports:
-      - "9100:9100"
-      
-- name: Запуск Nginx Exporter контейнера
-  docker_container:
-    name: nginx_exporter
-    image: "{{ nginx_exporter_image }}"
-    network_mode: "{{ network_name }}"
-    ports:
-      - "9113:9113"
-      
-- name: Запуск MySQL Exporter контейнера
-  docker_container:
-    name: mysql_exporter
-    image: "{{ mysql_exporter_image }}"
-    network_mode: "{{ network_name }}"
-    ports:
-      - "9104:9104"
-      
-- name: Запуск Cadvisor контейнера
-  docker_container:
-    name: cadvisor
-    image: "{{ cadvisor_image }}"
-    network_mode: "{{ network_name }}"
-    ports: 
-      - "8080:8080"
-
-- name: Запуск Prometheus контейнера
-  docker_container:
-    name: prometheus
-    image: "{{ prometheus_image }}"
-    network_mode: "{{ network_name }}"
-    volumes:
-      - "{{ prometheus_conf_path }}:/etc/prometheus"
-    ports:
-      - "9090:9090"
-      
-- name: Запуск Grafana контейнера
-  docker_container:
-    name: grafana
-    image: "{{ grafana_image }}"
-    network_mode: "{{ network_name }}"
-    ports:
-      - "3000:3000"
-      
-- name: Запуск Fluentd контейнера
-  docker_container:
-    name: fluentd
-    image: "{{ fluentd_image }}"
-    network_mode: "{{ network_name }}"
-    volumes:
-      - "{{ fluentd_conf_path }}:/fluentd/etc"
-    ports:
-      - "24224:24224"
-      
-- name: Запуск MySQL контейнера
-  docker_container:
-    name: mysql
-    image: "{{ mysql_image }}"
-    network_mode: "{{ network_name }}"
-    volumes:
-      - "{{ mysql_conf_path }}:/etc/mysql"
-      - "{{ mysql_log_path }}:/var/log/mysql"
-    ports:
-      - "3306:3306"
-
-- name: Кастомный формат логов Nginx
-  template:
-    src: "nginx_log_format.conf.j2"
-    dest: "{{ nginx_conf_path }}/nginx_log_format.conf"
-
-- name: Перезагрузить Nginx
-  shell: docker exec nginx nginx -s reload
-
-- name: Скопировать конфигурационные файлы в места назначения
-  synchronize:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - { src: "{{ nginx_conf_path }}", dest: "/etc/nginx/conf.d" }
-    - { src: "{{ apache_conf_path }}", dest: "/usr/local/apache2/conf" }
-    - { src: "{{ mysql_conf_path }}", dest: "/etc/mysql" }
-    - { src: "{{ prometheus_conf_path }}", dest: "/etc/prometheus" }
-    - { src: "{{ fluentd_conf_path }}", dest: "/fluentd/etc" }
+    - name: Start Nginx Exporter container
+      # Запускаем контейнер 
+	  docker_container:
+        name: nginx_exporter
+        image: "{{ nginx_exporter_image }}"
+        network_mode: "stack_network"
+        ports:
+          - "9113:9113"
+        command: -nginx.scrape_uri=http://nginx:80/stub_status
     
-- name: Проверить, что все контейнеры работают
-  shell: docker ps
+    - name: Start MySQL Exporter container
+      # Запускаем контейнер с MySQL Exporter
+      docker_container:
+        name: mysql_exporter
+        image: "{{ mysql_exporter_image }}"
+        network_mode: "stack_network"
+        ports:
+          - "9104:9104"
+        command: --config.my-cnf=/etc/mysql/my.cnf
+    
+    - name: Start cAdvisor container
+      # Запускаем контейнер с cAdvisor
+      docker_container:
+        name: cadvisor
+        image: "{{ cadvisor_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "/:/rootfs:ro"
+          - "/var/run:/var/run:rw"
+          - "/sys:/sys:ro"
+          - "/var/lib/docker/:/var/lib/docker:ro"
+        ports:
+          - "8080:8080"
+      
+    - name: Start Prometheus container
+      # Запускаем контейнер с Prometheus
+      docker_container:
+        name: prometheus
+        image: "{{ prometheus_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "./prometheus/conf:/etc/prometheus"
+          - "./prometheus/data:/prometheus"
+      ports:
+        - "9090:9090"
+      
+    - name: Start Grafana container
+      # Запускаем контейнер с Grafana
+	  docker_container:
+        name: grafana
+        image: "{{ grafana_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "./grafana/conf:/etc/grafana"
+          - "./grafana/data:/var/lib/grafana"
+        ports:
+          - "3000:3000"
+      
+    - name: Start Fluentd container
+      # Запускаем контейнер с Fluentd
+      docker_container:
+        name: fluentd
+        image: "{{ fluentd_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "./fluentd/conf:/fluentd/etc"
+          - "./fluentd/logs:/fluentd/log"
+      
+    - name: Start MySQL container
+      # Запускаем контейнер с MySQL
+      docker_container:
+        name: mysql
+        image: "{{ mysql_image }}"
+        network_mode: "stack_network"
+        volumes:
+          - "./mysql/conf:/etc/mysql"
+          - "./mysql/data:/var/lib/mysql"
