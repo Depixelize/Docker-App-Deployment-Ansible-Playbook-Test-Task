@@ -14,11 +14,29 @@
     - name: Create custom Docker network
       command: docker network create --subnet=10.0.0.0/24 custom_network
     - name: Pull and run Nginx container
-      command: docker run --name nginx --net custom_network --ip 10.0.0.2 -p 80:80 nginx:alpine
+      docker_container:
+        name: nginx
+        network_mode: custom_network
+        ipv4_address: 10.0.0.2
+        ports:
+          - "80:80"
+        image: nginx:alpine
     - name: Pull and run Apache container
-      command: docker run --name apache1 --net custom_network --ip 10.0.0.3 -p 8080:80 httpd:2.4-alpine
+      docker_container:
+        name: apache1
+        network_mode: custom_network
+        ipv4_address: 10.0.0.3
+        ports:
+          - "8080:80"
+        image: httpd:2.4-alpine
     - name: Pull and run second Apache container
-      command: docker run --name apache2 --net custom_network --ip 10.0.0.4 -p 8081:80 httpd:2.4-alpine
+      docker_container:
+        name: apache2
+        network_mode: custom_network
+        ipv4_address: 10.0.0.4
+        ports:
+          - "8081:80"
+        image: httpd:2.4-alpine
     - name: Pull and run Node exporter container
       command: docker run --name node_exporter --net custom_network --ip 10.0.0.5 prom/node-exporter
     - name: Pull and run Nginx exporter container
