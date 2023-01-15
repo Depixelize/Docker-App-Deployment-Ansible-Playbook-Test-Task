@@ -17,7 +17,6 @@
       docker_container:
         name: nginx
         network_mode: custom_network
-        ipv4_address: 10.0.0.2
         ports:
           - "80:80"
         image: nginx:alpine
@@ -25,7 +24,6 @@
       docker_container:
         name: apache1
         network_mode: custom_network
-        ipv4_address: 10.0.0.3
         ports:
           - "8080:80"
         image: httpd:2.4-alpine
@@ -33,7 +31,6 @@
       docker_container:
         name: apache2
         network_mode: custom_network
-        ipv4_address: 10.0.0.4
         ports:
           - "8081:80"
         image: httpd:2.4-alpine
