@@ -1,5 +1,5 @@
 - name: Install and configure Docker on Debian 11.6 minimal
-  hosts: all
+  hosts: localhost
   become: yes
   tasks:
     - name: Install Docker
