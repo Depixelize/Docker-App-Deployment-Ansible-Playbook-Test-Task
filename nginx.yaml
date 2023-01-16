@@ -47,9 +47,7 @@
         image: nginx:latest
         state: started
         ports:
-          - "80:80"
-	exposed:
-          - "80:80"
+          - "8080:80"
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.2
