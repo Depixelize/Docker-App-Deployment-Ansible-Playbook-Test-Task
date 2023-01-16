@@ -1,0 +1,11 @@
+<VirtualHost *:8081>
+    ServerName first.tst
+    DocumentRoot /srv/www/html
+    <Directory /srv/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog /srv/apache/logs/apache1_error.log
+    CustomLog /srv/apache/logs/apache1_access.log combined
+</VirtualHost>

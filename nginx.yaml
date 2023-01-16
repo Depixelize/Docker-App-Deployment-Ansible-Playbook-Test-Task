@@ -1,0 +1,194 @@
+---
+- name: Install Apache Docker Container with PHP 7.2 and Nginx with GeoIP support
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+      register: docker_install
+
+    - name: Install Python Pip
+      apt:
+        name: python3-pip
+        state: present
+      register: python_pip_install
+
+    - name: Install Docker-py
+      pip:
+        name: docker-py
+        state: present
+
+    - name: Pull Apache Docker Image
+      docker_image:
+        name: httpd:latest
+        source: pull
+        state: present
+
+    - name: Pull PHP 7.2 Docker Image
+      docker_image:
+        name: php:7.2-apache
+        source: pull
+        state: present
+
+    - name: Pull Nginx Docker Image
+      docker_image:
+        name: nginx:latest
+        source: pull
+        state: present
+
+    - name: Create custom Docker network
+      command: docker network create --subnet=10.0.0.0/24 custom_network
+
+    - name: Create Nginx Container
+      docker_container:
+        name: nginx
+        image: nginx:latest
+        state: started
+        ports:
+          - "80:80"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.2
+
+    - name: Create Apache1 Container
+      docker_container:
+        name: apache1
+        image: httpd:latest
+        state: started
+        ports:
+          - "8081:8082"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.3
+
+    - name: Create Apache2 Container
+      docker_container:
+        name: apache2
+        image: httpd:latest
+        state: started
+        ports:
+          - "8082:8082"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.4
+
+    - name: Create PHP 7.2 Container-1
+      docker_container:
+        name: php1
+        image: php:7.2-apache
+        state: started
+        ports:
+          - "9001:9001"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.5
+
+    - name: Create PHP 7.2 Container-2
+      docker_container:
+        name: php2
+        image: php:7.2-apache
+        state: started
+        ports:
+          - "9002:9002"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.6
+
+    - name: Download GeoIP.dat.gz
+      get_url:
+        url: https://mailfud.org/geoip-legacy/GeoIP.dat.gz
+        dest: /tmp/GeoIP.dat.gz
+
+    - name: Unpack GeoIP.dat.gz
+      command: gunzip /tmp/GeoIP.dat.gz
+
+    - name: Copy GeoIP.dat to Nginx Container
+      docker_container:
+        name: nginx
+        state: started
+        volumes:
+          - /tmp/GeoIP.dat:/etc/nginx/GeoIP.dat
+
+
+    - name: Create folder structure
+      file:
+        path: /srv
+        state: directory
+        mode: 0755
+      register: folder_structure
+
+    - name: Create Nginx config folder
+      file:
+        path: "{{ folder_structure.path }}/nginx/conf"
+        state: directory
+        mode: 0755
+
+    - name: Create Nginx logs folder
+      file:
+        path: "{{ folder_structure.path }}/nginx/logs"
+        state: directory
+        mode: 0755
+
+    - name: Create Apache config folder
+      file:
+        path: "{{ folder_structure.path }}/apache/conf"
+        state: directory
+        mode: 0755
+
+    - name: Create Apache logs folder
+      file:
+        path: "{{ folder_structure.path }}/apache/logs"
+        state: directory
+        mode: 0755
+
+    - name: Create MySQL config folder
+      file:
+        path: "{{ folder_structure.path }}/mysql/conf"
+        state: directory
+        mode: 0755
+
+    - name: Create MySQL logs folder
+      file:
+        path: "{{ folder_structure.path }}/mysql/logs"
+        state: directory
+        mode: 0755
+
+    - name: Create content folder
+      file:
+        path: "{{ folder_structure.path }}/www/html"
+        state: directory
+        mode: 0755
+
+    - name: Create first.tst domain
+      lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 first.tst"
+        state: present
+
+    - name: Create second.tst domain
+      lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 second.tst"
+        state: present
+
+    - name: Configure Nginx
+      template:
+        src: nginx.conf.j2
+        dest: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
+
+    - name: Configure Apache1
+      template:
+        src: apache1.conf.j2
+        dest: "{{ folder_structure.path }}/apache/conf/apache1.conf"
+
+    - name: Configure Apache2
+      template:
+        src: apache2.conf.j2
+        dest: "{{ folder_structure.path }}/apache/conf/apache2.conf"
+
+    - name: Restart Nginx Container
+      docker_container:
+        name: nginx
+        state: restarted

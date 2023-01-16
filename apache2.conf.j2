@@ -1,0 +1,11 @@
+<VirtualHost *:8082>
+    ServerName second.tst
+    DocumentRoot /srv/www/html
+    <Directory /srv/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog /srv/apache/logs/apache2_error.log
+    CustomLog /srv/apache/logs/apache2_access.log combined
+</VirtualHost>

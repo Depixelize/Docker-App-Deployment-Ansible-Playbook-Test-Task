@@ -1,5 +1,5 @@
 - name: Install and configure Docker on Debian 11.6 minimal
-  hosts: localhost
+  hosts: all
   become: yes
   tasks:
     - name: Install Docker
@@ -16,62 +16,96 @@
     - name: Pull and run Nginx container
       docker_container:
         name: nginx
+        image: nginx:alpine
         network_mode: custom_network
         ports:
           - "80:80"
-        image: nginx:alpine
     - name: Pull and run Apache container
       docker_container:
         name: apache1
+        image: httpd:2.4-alpine
         network_mode: custom_network
         ports:
           - "8080:80"
-        image: httpd:2.4-alpine
+        volumes:
+          - "/srv/apache/conf:/usr/local/apache2/conf"
+          - "/srv/apache/logs:/usr/local/apache2/logs"
     - name: Pull and run second Apache container
       docker_container:
         name: apache2
+        image: httpd:2.4-alpine
         network_mode: custom_network
         ports:
           - "8081:80"
-        image: httpd:2.4-alpine
+        volumes:
+          - "/srv/apache/conf:/usr/local/apache2/conf"
+          - "/srv/apache/logs:/usr/local/apache2/logs"
     - name: Pull and run Node exporter container
-      command: docker run --name node_exporter --net custom_network --ip 10.0.0.5 prom/node-exporter
+      docker_container:
+        name: node_exporter
+        image: prom/node-exporter
+        network_mode: custom_network
     - name: Pull and run Nginx exporter container
-      command: docker run --name nginx_exporter --net custom_network --ip 10.0.0.6 quay.io/prometheus/nginx-exporter
+      docker_container:
+        name: nginx_exporter
+        image: quay.io/prometheus/nginx-exporter
+        network_mode: custom_network
     - name: Pull and run MySQL exporter container
-      command: docker run --name mysql_exporter --net custom_network --ip 10.0.0.7 prom/mysqld-exporter
+      docker_container:
+        name: mysql_exporter
+        image: prom/mysqld-exporter
+        network_mode: custom_network
     - name: Pull and run Cadvisor container
-      command: docker run --name cadvisor --net custom_network --ip 10.0.0.8 google/cadvisor
+      docker_container:
+        name: cadvisor
+        image: google/cadvisor
+        network_mode: custom_network
     - name: Pull and run Prometheus container
-      command: docker run --name prometheus --net custom_network --ip 10.0.0.9 prom/prometheus
+      docker_container:
+        name: prometheus
+        image: prom/prometheus
+        network_mode: custom_network
     - name: Pull and run Grafana container
-      command: docker run --name grafana --net custom_network --ip 10.0.0.10 grafana/grafana
+      docker_container:
+        name: grafana
+        image: grafana/grafana
+        network_mode: custom_network
     - name: Pull and run Fluentd container
-      command: docker run --name fluentd --net custom_network --ip 10.0.0.11 fluent/fluentd
+      docker_container:
+        name: fluentd
+        image: fluent/fluentd
+        network_mode: custom_network
     - name: Pull and run MySQL container
-      command: docker run --name mysql --net custom_network --ip 10.0.0.12 -e MYSQL_ROOT_PASSWORD=password mysql:5.7
-    - name: Create necessary directories and configs
+      docker_container:
+        name: mysql
+        image: mysql:5.7
+        network_mode: custom_network
+        env:
+          MYSQL_ROOT_PASSWORD: password
+    - name: Pull and run PHP-FPM container
+      docker_container:
+        name: php-fpm
+        image: php:7.2-fpm
+        network_mode: custom_network
+        volumes:
+          - "/srv/www/html:/var/www/html"
+    - name: Create directories
       file:
-        path: /srv/nginx/conf
+        path: "/srv/{{ item }}"
         state: directory
-      file:
-        path: /srv/nginx/logs
-        state: directory
-      file:
-        path: /srv/apache/conf
-        state: directory
-      file:
-        path: /srv/apache/logs
-        state: directory
-      file:
-        path: /srv/mysql/conf
-        state: directory
-      file:
-        path: /srv/mysql/logs
-        state: directory
-      file:
-        path: /srv/www/html
-        state: directory
+      with_items:
+        - nginx
+        - apache
+        - mysql
+        - www
+    - name: Create config files
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - { src: "nginx.conf.j2", dest: "/srv/nginx/conf/nginx.conf" }
+        - { src: "apache.conf.j2", dest: "/srv/apache/conf/apache.conf" }
+        - { src: "mysql.conf.j2", dest: "/srv/mysql/conf/mysql.conf" }
     - name: Create custom Nginx log format
       lineinfile:
         path: /srv/nginx/conf/nginx.conf
@@ -80,72 +114,19 @@
     - name: Create DNS records
       lineinfile:
         path: /etc/hosts
+        line: '10.0.0.2 nginx'
+        line: '10.0.0.3 apache1'
+        line: '10.0.0.4 apache2'
+        line: '10.0.0.5 node_exporter'
+        line: '10.0.0.6 nginx_exporter'
+        line: '10.0.0.7 mysql_exporter'
+        line: '10.0.0.8 cadvisor'
+        line: '10.0.0.9 prometheus'
+        line: '10.0.0.10 grafana'
+        line: '10.0.0.11 fluentd'
+        line: '10.0.0.12 mysql'
         line: '10.0.0.2 first.tst'
         line: '10.0.0.2 second.tst'
-    - name: Create Node exporter config
-      lineinfile:
-        path: /srv/node_exporter/conf/node_exporter.yml
-        line: 'scrape_configs:'
-        line: '  - job_name: "node_exporter"'
-        line: '    static_configs:'
-        line: '      - targets: ["10.0.0.5:9100"]'
-    - name: Configure MySQL
-      command: mysql_secure_installation
-      args:
-        prompt:
-          - "Enter current password for root (enter for none):"
-          - "Set root password? [Y/n]"
-          - "Remove anonymous users? [Y/n]"
-          - "Disallow root login remotely? [Y/n]"
-          - "Remove test database and access to it? [Y/n]"
-          - "Reload privilege tables now? [Y/n]"
-        answer:
-          - ""
-          - "Y"
-          - "Y"
-          - "Y"
-          - "Y"
-          - "Y"
-    - name: Create test database
-      command: mysql -u root -p -e "CREATE DATABASE test_db;"
-    - name: Create database user
-      command: mysql -u root -p -e "CREATE USER 'test_user'@'localhost' IDENTIFIED BY 'password';"
-    - name: Mount volumes
-      mount:
-        path: /srv/nginx/conf
-        src: /var/lib/docker/volumes/nginx_conf
-        fstype: none
-        opts: bind
-      mount:
-        path: /srv/nginx/logs
-        src: /var/lib/docker/volumes/nginx_logs
-        fstype: none
-        opts: bind
-      mount:
-        path: /srv/apache/conf
-        src: /var/lib/docker/volumes/apache_conf
-        fstype: none
-        opts: bind
-      mount:
-        path: /srv/apache/logs
-        src: /var/lib/docker/volumes/apache_logs
-        fstype: none
-        opts: bind
-      mount:
-        path: /srv/mysql/conf
-        src: /var/lib/docker/volumes/mysql_conf
-        fstype: none
-        opts: bind
-      mount:
-        path: /srv/mysql/logs
-        src: /var/lib/docker/volumes/mysql_logs
-        fstype: none
-        opts: bind
-      mount:
-        path: /srv/www/html
-        src: /var/lib/docker/volumes/www_html
-        fstype: none
-        opts: bind
     - name: Restart Docker service
       service:
         name: docker
