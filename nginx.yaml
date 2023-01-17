@@ -52,7 +52,7 @@
       file:
         path: "{{ folder_structure.path }}/nginx/logs"
         state: directory
-        mode: 0755
+        mode: 0777
 
     - name: Create Apache config folder
       file:
