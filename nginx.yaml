@@ -20,7 +20,6 @@
         name: docker-py
         state: present
 
-
     - name: Pull Apache-PHP 7.2 Docker Image
       docker_image:
         name: php:7.2-apache
@@ -35,39 +34,6 @@
 
     - name: Create custom Docker network
       command: docker network create --subnet=10.0.0.0/24 custom_network
-
-    - name: Create Nginx Container
-      docker_container:
-        name: nginx
-        image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
-        state: started
-        ports:
-          - "8080:80"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.2
-
-    - name: Create Apache-PHP 7.2 Container-1
-      docker_container:
-        name: apache1
-        image: php:7.2-apache
-        state: started
-        ports:
-          - "8081:8081"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.3
-
-    - name: Create Apache-PHP 7.2 Container-2
-      docker_container:
-        name: apache2
-        image: php:7.2-apache
-        state: started
-        ports:
-          - "8082:8082"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.4
 
     - name: Create folder structure
       file:
@@ -145,59 +111,115 @@
         src: apache2.conf.j2
         dest: "{{ folder_structure.path }}/apache/conf/apache2.conf"
 
+    - name: Create Nginx Container
+      docker_container:
+        name: nginx
+        image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
+        state: started
+        ports:
+          - "8080:80"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.2
+
+    - name: Create Apache-PHP 7.2 Container-1
+      docker_container:
+        name: apache1
+        image: php:7.2-apache
+        state: started
+        ports:
+          - "8081:8081"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.3
+
+    - name: Create Apache-PHP 7.2 Container-2
+      docker_container:
+        name: apache2
+        image: php:7.2-apache
+        state: started
+        ports:
+          - "8082:8082"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.4
+
+    - name: Create Nginx Container
+      docker_container:
+        name: nginx
+        image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
+        state: started
+        ports:
+          - "80:80"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.2
+
+    - name: Create Apache-PHP 7.2 Container-1
+      docker_container:
+        name: apache1
+        image: php:7.2-apache
+        state: started
+        ports:
+          - "8081:8081"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.3
+
+    - name: Create Apache-PHP 7.2 Container-2
+      docker_container:
+        name: apache2
+        image: php:7.2-apache
+        state: started
+        ports:
+          - "8082:8082"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.4
+
+    - name: Copy configs to containers
+      command: docker cp {{ folder_structure.path }}/nginx/conf/nginx.conf {{ item }}:/etc/nginx/conf.d
+      with_items:
+        - nginx
+        - apache1
+        - apache2
+
+    - name: Bind log paths from container to server
+      command: docker run --rm --volumes-from {{ item }} -v {{ folder_structure.path }}/{{ item }}/logs:/logs ubuntu tar cvf /logs/{{ item }}.tar /var/log/{{ item }}
+      with_items:
+        - nginx
+        - apache1
+        - apache2
+
     - name: Restart Nginx Container
       docker_container:
         name: nginx
-        state: started
-    - name: Copy Nginx config to container
-      docker_container:
-        name: nginx
-        copy:
-          src: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
-          dest: /etc/nginx/nginx.conf
-        state: reloaded
+        image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
+        state: restarted
+        ports:
+          - "80:80"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.2
 
-    - name: Copy Apache1 config to container
-      docker_container:
-        name: apache1
-        copy:
-          src: "{{ folder_structure.path }}/apache/conf/apache1.conf"
-          dest: /etc/apache2/apache1.conf
-        state: reloaded
-
-    - name: Copy Apache2 config to container
-      docker_container:
-        name: apache2
-        copy:
-          src: "{{ folder_structure.path }}/apache/conf/apache2.conf"
-          dest: /etc/apache2/apache2.conf
-        state: reloaded
-
-    - name: Create log folder
-      file:
-        path: "{{ folder_structure.path }}/logs"
-        state: directory
-
-    - name: Copy Nginx log to log folder
-      docker_container:
-        name: nginx
-        copy:
-          src: /var/log/nginx
-          dest: "{{ folder_structure.path }}/logs/nginx"
-        state: reloaded
-
-    - name: Copy Apache1 log to log folder
+    - name: Restart Apache-PHP 7.2 Container-1
       docker_container:
         name: apache1
-        copy:
-          src: /var/log/apache2
-          dest: "{{ folder_structure.path }}/logs/apache1"
-        state: reloaded
+        image: php:7.2-apache
+        state: restarted
+        ports:
+          - "8081:8081"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.3
 
-    - name: Copy Apache2 log to log folder
+    - name: Restart Apache-PHP 7.2 Container-2
       docker_container:
         name: apache2
-        copy:
-          src: /var/log/apache2
-          dest: "{{ folder_structure.path }}/logs/apache2"
-        state: reloaded
+        image: php:7.2-apache
+        state: restarted
+        ports:
+          - "8082:8082"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.4
