@@ -1,8 +1,8 @@
+LoadModule mpm_prefork_module /usr/lib/apache2/modules/mod_mpm_prefork.so
+
 <VirtualHost *:8082>
     ServerName second.tst
-    DocumentRoot /var/www/second.tst
-    ErrorLog /var/log/apache2/error.log
-    CustomLog /var/log/apache2/access.log combined
+    DocumentRoot /var/www/html/second
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
-
-LoadModule mpm_prefork_module /usr/lib/apache2/modules/mod_mpm_prefork.so

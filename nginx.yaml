@@ -96,17 +96,39 @@
         line: "127.0.0.1 second.tst"
         state: present
 
-    - name: Configure Nginx
+    - name: Create first.tst folder
+      file:
+        path: "{{ folder_structure.path }}/www/html/first"
+        state: directory
+        mode: 0755
+
+    - name: Create second.tst folder
+      file:
+        path: "{{ folder_structure.path }}/www/html/second"
+        state: directory
+        mode: 0755
+
+    - name: Copy index.php to first.tst folder
+      copy:
+        src: index.php
+        dest: "{{ folder_structure.path }}/www/html/first"
+
+    - name: Copy index.php to second.tst folder
+      copy:
+        src: index.php
+        dest: "{{ folder_structure.path }}/www/html/second"
+
+    - name: Copying Nginx config
       template:
         src: nginx.conf.j2
         dest: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
 
-    - name: Configure Apache1
+    - name: Copying Apache1 config
       template:
         src: apache1.conf.j2
         dest: "{{ folder_structure.path }}/apache/conf/apache1.conf"
 
-    - name: Configure Apache2
+    - name: Copying Apache2 config
       template:
         src: apache2.conf.j2
         dest: "{{ folder_structure.path }}/apache/conf/apache2.conf"
@@ -121,6 +143,9 @@
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.2
+        volumes:
+          - "{{ folder_structure.path }}/nginx/conf:/etc/nginx/conf.d"
+          - "{{ folder_structure.path }}/nginx/logs:/var/log/nginx"
 
     - name: Create Apache-PHP 7.2 Container-1
       docker_container:
@@ -132,6 +157,10 @@
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.3
+        volumes:
+          - "{{ folder_structure.path }}/apache/conf:/etc/apache2/sites-enabled"
+          - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
+          - "{{ folder_structure.path }}/www/html:/var/www/html"
 
     - name: Create Apache-PHP 7.2 Container-2
       docker_container:
@@ -143,14 +172,7 @@
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.4
-
-
-    - name: Copy configs to containers
-      command: docker cp {{ folder_structure.path }}/nginx/conf/nginx.conf nginx:/etc/nginx
-
-    - name: Copy2 configs to containers
-      command: docker cp {{ folder_structure.path }}/apache/conf/apache1.conf apache1:/etc/apache2/apache2.conf
-
-    - name: Copy3 configs to containers
-      command: docker cp {{ folder_structure.path }}/apache/conf/apache2.conf apache2:/etc/apache2/apache2.conf
-
+        volumes:
+          - "{{ folder_structure.path }}/apache/conf:/etc/apache2/sites-enabled"
+          - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
+          - "{{ folder_structure.path }}/www/html:/var/www/html"
