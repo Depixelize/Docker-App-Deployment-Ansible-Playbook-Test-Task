@@ -1,7 +1,8 @@
-http {
-    events {
+events {
         worker_connections 1024;
-    }
+}
+
+http {
 
     upstream apache1 {
         server 10.0.0.3:8081;
