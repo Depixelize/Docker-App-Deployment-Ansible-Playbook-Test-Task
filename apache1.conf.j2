@@ -1,11 +1,8 @@
 <VirtualHost *:8081>
     ServerName first.tst
-    DocumentRoot /srv/www/html
-    <Directory /srv/www/html>
-        Options Indexes FollowSymLinks
-        AllowOverride All
-        Require all granted
-    </Directory>
-    ErrorLog /srv/apache/logs/apache1_error.log
-    CustomLog /srv/apache/logs/apache1_access.log combined
+    DocumentRoot /var/www/first.tst
+    ErrorLog /var/log/apache1/error.log
+    CustomLog /var/log/apache1/access.log combined
 </VirtualHost>
+
+LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
