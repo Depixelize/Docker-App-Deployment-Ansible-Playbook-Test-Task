@@ -20,13 +20,8 @@
         name: docker-py
         state: present
 
-    - name: Pull Apache Docker Image
-      docker_image:
-        name: httpd:latest
-        source: pull
-        state: present
 
-    - name: Pull PHP 7.2 Docker Image
+    - name: Pull Apache-PHP 7.2 Docker Image
       docker_image:
         name: php:7.2-apache
         source: pull
@@ -34,7 +29,7 @@
 
     - name: Pull Nginx Docker Image
       docker_image:
-        name: nginx:latest
+        name: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
         source: pull
         state: present
 
@@ -44,7 +39,7 @@
     - name: Create Nginx Container
       docker_container:
         name: nginx
-        image: nginx:latest
+        image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
         state: started
         ports:
           - "8080:80"
@@ -52,65 +47,27 @@
           - name: custom_network
             ipv4_address: 10.0.0.2
 
-    - name: Create Apache1 Container
+    - name: Create Apache-PHP 7.2 Container-1
       docker_container:
         name: apache1
-        image: httpd:latest
+        image: php:7.2-apache
         state: started
         ports:
-          - "8081:8082"
+          - "8081:8081"
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.3
 
-    - name: Create Apache2 Container
+    - name: Create Apache-PHP 7.2 Container-2
       docker_container:
         name: apache2
-        image: httpd:latest
+        image: php:7.2-apache
         state: started
         ports:
           - "8082:8082"
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.4
-
-    - name: Create PHP 7.2 Container-1
-      docker_container:
-        name: php1
-        image: php:7.2-apache
-        state: started
-        ports:
-          - "9001:9001"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.5
-
-    - name: Create PHP 7.2 Container-2
-      docker_container:
-        name: php2
-        image: php:7.2-apache
-        state: started
-        ports:
-          - "9002:9002"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.6
-
-    - name: Download GeoIP.dat.gz
-      get_url:
-        url: https://mailfud.org/geoip-legacy/GeoIP.dat.gz
-        dest: /tmp/GeoIP.dat.gz
-
-    - name: Unpack GeoIP.dat.gz
-      command: gunzip /tmp/GeoIP.dat.gz
-
-    - name: Copy GeoIP.dat to Nginx Container
-      docker_container:
-        name: nginx
-        state: started
-        volumes:
-          - /tmp/GeoIP.dat:/etc/nginx/GeoIP.dat
-
 
     - name: Create folder structure
       file:
@@ -191,4 +148,4 @@
     - name: Restart Nginx Container
       docker_container:
         name: nginx
-        state: restarted
+        state: started
