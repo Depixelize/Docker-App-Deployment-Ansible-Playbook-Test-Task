@@ -149,3 +149,55 @@
       docker_container:
         name: nginx
         state: started
+    - name: Copy Nginx config to container
+      docker_container:
+        name: nginx
+        copy:
+          src: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
+          dest: /etc/nginx/nginx.conf
+        state: reloaded
+
+    - name: Copy Apache1 config to container
+      docker_container:
+        name: apache1
+        copy:
+          src: "{{ folder_structure.path }}/apache/conf/apache1.conf"
+          dest: /etc/apache2/apache1.conf
+        state: reloaded
+
+    - name: Copy Apache2 config to container
+      docker_container:
+        name: apache2
+        copy:
+          src: "{{ folder_structure.path }}/apache/conf/apache2.conf"
+          dest: /etc/apache2/apache2.conf
+        state: reloaded
+
+    - name: Create log folder
+      file:
+        path: "{{ folder_structure.path }}/logs"
+        state: directory
+
+    - name: Copy Nginx log to log folder
+      docker_container:
+        name: nginx
+        copy:
+          src: /var/log/nginx
+          dest: "{{ folder_structure.path }}/logs/nginx"
+        state: reloaded
+
+    - name: Copy Apache1 log to log folder
+      docker_container:
+        name: apache1
+        copy:
+          src: /var/log/apache2
+          dest: "{{ folder_structure.path }}/logs/apache1"
+        state: reloaded
+
+    - name: Copy Apache2 log to log folder
+      docker_container:
+        name: apache2
+        copy:
+          src: /var/log/apache2
+          dest: "{{ folder_structure.path }}/logs/apache2"
+        state: reloaded
