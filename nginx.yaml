@@ -178,18 +178,9 @@
             ipv4_address: 10.0.0.4
 
     - name: Copy configs to containers
-      command: docker cp {{ folder_structure.path }}/nginx/conf/nginx.conf {{ item }}:/etc/nginx/conf.d
-      with_items:
-        - nginx
-        - apache1
-        - apache2
-
-    - name: Bind log paths from container to server
-      command: docker run --rm --volumes-from {{ item }} -v {{ folder_structure.path }}/{{ item }}/logs:/logs ubuntu tar cvf /logs/{{ item }}.tar /var/log/{{ item }}
-      with_items:
-        - nginx
-        - apache1
-        - apache2
+      command: docker cp {{ folder_structure.path }}/nginx/conf/nginx.conf nginx:/etc/nginx
+      command: docker cp {{ folder_structure.path }}/apache/conf/apache1.conf apache1:/etc/apache2/apache2.conf
+      command: docker cp {{ folder_structure.path }}/apache/conf/apache2.conf apache2:/etc/apache2/apache2.conf
 
     - name: Restart Nginx Container
       docker_container:
