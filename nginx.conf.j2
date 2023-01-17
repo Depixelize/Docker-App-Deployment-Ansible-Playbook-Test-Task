@@ -1,17 +1,5 @@
 server {
-    listen 80;
-    server_name first.tst;
-    location / {
-        proxy_pass http://10.0.0.3:8081;
-    }
-    geoip_country /etc/nginx/GeoIP.dat;
-}
-
-server {
-    listen 80;
-    server_name second.tst;
-    location / {
-        proxy_pass http://10.0.0.4:8082;
-    }
-    geoip_country /etc/nginx/GeoIP.dat;
+	server_name 127.0.0.1; #Your current server ip address. It will redirect to the domain name.
+	listen 80;
+	return 301 https://example.com$request_uri;
 }
