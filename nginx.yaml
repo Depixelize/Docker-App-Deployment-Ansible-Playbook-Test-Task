@@ -117,39 +117,6 @@
         image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
         state: started
         ports:
-          - "8080:80"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.2
-
-    - name: Create Apache-PHP 7.2 Container-1
-      docker_container:
-        name: apache1
-        image: php:7.2-apache
-        state: started
-        ports:
-          - "8081:8081"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.3
-
-    - name: Create Apache-PHP 7.2 Container-2
-      docker_container:
-        name: apache2
-        image: php:7.2-apache
-        state: started
-        ports:
-          - "8082:8082"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.4
-
-    - name: Create Nginx Container
-      docker_container:
-        name: nginx
-        image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
-        state: started
-        ports:
           - "80:80"
         networks:
           - name: custom_network
@@ -176,41 +143,14 @@
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.4
+
 
     - name: Copy configs to containers
       command: docker cp {{ folder_structure.path }}/nginx/conf/nginx.conf nginx:/etc/nginx
+
+    - name: Copy2 configs to containers
       command: docker cp {{ folder_structure.path }}/apache/conf/apache1.conf apache1:/etc/apache2/apache2.conf
+
+    - name: Copy3 configs to containers
       command: docker cp {{ folder_structure.path }}/apache/conf/apache2.conf apache2:/etc/apache2/apache2.conf
 
-    - name: Restart Nginx Container
-      docker_container:
-        name: nginx
-        image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
-        state: restarted
-        ports:
-          - "80:80"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.2
-
-    - name: Restart Apache-PHP 7.2 Container-1
-      docker_container:
-        name: apache1
-        image: php:7.2-apache
-        state: restarted
-        ports:
-          - "8081:8081"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.3
-
-    - name: Restart Apache-PHP 7.2 Container-2
-      docker_container:
-        name: apache2
-        image: php:7.2-apache
-        state: restarted
-        ports:
-          - "8082:8082"
-        networks:
-          - name: custom_network
-            ipv4_address: 10.0.0.4
