@@ -1,15 +1,14 @@
-
 http {
+    events {
+        worker_connections 1024;
+    }
+
     upstream apache1 {
         server 10.0.0.3:8081;
     }
 
     upstream apache2 {
         server 10.0.0.4:8082;
-    }
-
-    events {
-        worker_connections 1024;
     }
 
     server {
