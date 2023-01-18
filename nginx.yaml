@@ -174,7 +174,7 @@
     - name: Copying Nginx-proxy config
       copy:
         src: nginx.conf
-        dest: "{{ folder_structure.path }}/nginx/conf/nginx-proxy.conf"
+        dest: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
 
     - name: Copying Apache01 config
       copy:
