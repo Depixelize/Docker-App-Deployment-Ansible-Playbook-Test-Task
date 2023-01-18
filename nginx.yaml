@@ -136,7 +136,7 @@
           - name: custom_network
             ipv4_address: 10.0.0.2
         volumes:
-          - "{{ folder_structure.path }}/nginx/conf:/etc/nginx/conf"
+          - "{{ folder_structure.path }}/nginx/conf:/etc/nginx"
           - "{{ folder_structure.path }}/nginx/logs:/var/log/nginx"
 
     - name: Create Apache-PHP 7.2 Container-01
