@@ -2,12 +2,6 @@
   hosts: localhost
   become: true
   tasks:
-    - name: Create Fluentd config folder
-      file:
-        path: "{{ folder_structure.path }}/fluentd/conf
-        state: directory
-        mode: 0755
-
     - name: Pull MySQL Docker Image
       docker_image:
         name: mysql:5.7
@@ -25,8 +19,8 @@
           - name: custom_network
             ipv4_address: 10.0.0.5
         volumes:
-          - "{{ folder_structure.path }}/mysql/conf:/etc/mysql/conf.d"
-          - "{{ folder_structure.path }}/mysql/logs:/var/log/mysql"
+          - " /srv/mysql/conf:/etc/mysql/conf.d"
+          - " /srv/mysql/logs:/var/log/mysql"
         env:
           MYSQL_ROOT_PASSWORD: root
 
@@ -72,13 +66,13 @@
           - name: custom_network
             ipv4_address: 10.0.0.6
         volumes:
-          - "{{ folder_structure.path }}/fluentd/conf:/fluentd/etc"
-          - "{{ folder_structure.path }}/nginx/logs:/fluentd/log"
+          - " /srv/fluentd/conf:/fluentd/etc"
+          - " /srv/nginx/logs:/fluentd/log"
 
     - name: Copying Fluentd config
       template:
         src: fluentd.conf
-        dest: "{{ folder_structure.path }}/fluentd/conf/fluentd.conf"
+        dest: " /srv/fluentd/conf/fluentd.conf"
 
     - name: Restart containers
       command: docker restart mysql fluentd

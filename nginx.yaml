@@ -37,62 +37,61 @@
 
     - name: Create folder structure
       file:
-        path: /srv
+        path: "/srv"
         state: directory
         mode: 0755
-      register: folder_structure
 
     - name: Create Nginx config folder
       file:
-        path: "{{ folder_structure.path }}/nginx/conf"
+        path: "/srv/nginx/conf"
         state: directory
         mode: 0755
 
     - name: Create Nginx logs folder
       file:
-        path: "{{ folder_structure.path }}/nginx/logs"
+        path: "/srv/nginx/logs"
         state: directory
         mode: 0777
 
     - name: Create Apache01 config folder
       file:
-        path: "{{ folder_structure.path }}/apache/conf/apache01"
+        path: "/srv/apache/conf/apache01"
         state: directory
         mode: 0755
 
     - name: Create Apache02 config folder
       file:
-        path: "{{ folder_structure.path }}/apache/conf/apache02"
+        path: "/srv/apache/conf/apache02"
         state: directory
         mode: 0755
 
     - name: Create Apache logs folder
       file:
-        path: "{{ folder_structure.path }}/apache/logs"
+        path: "/srv/apache/logs"
         state: directory
         mode: 0755
 
     - name: Create MySQL config folder
       file:
-        path: "{{ folder_structure.path }}/mysql/conf"
+        path: "/srv/mysql/conf"
         state: directory
         mode: 0755
 
     - name: Create MySQL logs folder
       file:
-        path: "{{ folder_structure.path }}/mysql/logs"
+        path: "/srv/mysql/logs"
         state: directory
         mode: 0755
 
     - name: Create Fluentd config folder
       file:
-        path: "{{ folder_structure.path }}/fluentd/conf
+        path: "/srv/fluentd/conf"
         state: directory
         mode: 0755
 
     - name: Create content folder
       file:
-        path: "{{ folder_structure.path }}/www/html"
+        path: "/srv/www/html"
         state: directory
         mode: 0755
 
@@ -110,25 +109,25 @@
 
     - name: Create first.tst folder
       file:
-        path: "{{ folder_structure.path }}/www/html/first"
+        path: "/srv/www/html/first"
         state: directory
         mode: 0755
 
     - name: Create second.tst folder
       file:
-        path: "{{ folder_structure.path }}/www/html/second"
+        path: "/srv/www/html/second"
         state: directory
         mode: 0755
 
     - name: Copy index.php to first.tst folder
       copy:
         src: index.php
-        dest: "{{ folder_structure.path }}/www/html/first"
+        dest: "/srv/www/html/first"
 
     - name: Copy index.php to second.tst folder
       copy:
         src: index.php
-        dest: "{{ folder_structure.path }}/www/html/second"
+        dest: "/srv/www/html/second"
 
     - name: Create Nginx Container
       docker_container:
@@ -142,8 +141,8 @@
           - name: custom_network
             ipv4_address: 10.0.0.2
         volumes:
-          - "{{ folder_structure.path }}/nginx/conf:/etc/nginx/conf.d"
-          - "{{ folder_structure.path }}/nginx/logs:/var/log/nginx"
+          - "/srv/nginx/conf:/etc/nginx/conf.d"
+          - "/srv/nginx/logs:/var/log/nginx"
 
     - name: Create Apache-PHP 7.2 Container-01
       docker_container:
@@ -157,9 +156,9 @@
           - name: custom_network
             ipv4_address: 10.0.0.3
         volumes:
-          - "{{ folder_structure.path }}/apache/conf/apache01:/etc/apache2/sites-enabled"
-          - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
-          - "{{ folder_structure.path }}/www/html:/var/www/html"
+          - "/srv/apache/conf/apache01:/etc/apache2/sites-enabled"
+          - "/srv/apache/logs:/var/log/apache2"
+          - "/srv/www/html:/var/www/html"
 
     - name: Create Apache-PHP 7.2 Container-02
       docker_container:
@@ -173,9 +172,9 @@
           - name: custom_network
             ipv4_address: 10.0.0.4
         volumes:
-          - "{{ folder_structure.path }}/apache/conf/apache02:/etc/apache2/sites-enabled"
-          - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
-          - "{{ folder_structure.path }}/www/html:/var/www/html"
+          - "/srv/apache/conf/apache02:/etc/apache2/sites-enabled"
+          - "/srv/apache/logs:/var/log/apache2"
+          - "/srv/www/html:/var/www/html"
 
     - name: Copy Nginx config w/o logs to nginx container
       command: docker cp nginx.conf nginx:/etc/nginx
@@ -189,17 +188,17 @@
     - name: Copying Nginx-proxy config
       copy:
         src: nginx-proxy.conf
-        dest: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
+        dest: "/srv/nginx/conf/nginx.conf"
 
     - name: Copying Apache01 first.tst virtual server config
       copy:
         src: apache01.conf
-        dest: "{{ folder_structure.path }}/apache/conf/apache01/apache01.conf"
+        dest: "/srv/apache/conf/apache01/apache01.conf"
 
     - name: Copying Apache02 second.tst virtual server config
       copy:
         src: apache02.conf
-        dest: "{{ folder_structure.path }}/apache/conf/apache02/apache02.conf"
+        dest: "/srv/apache/conf/apache02/apache02.conf"
 
     - name: Restart containers
       command: docker restart nginx apache01 apache02
