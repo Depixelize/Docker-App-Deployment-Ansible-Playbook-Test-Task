@@ -54,9 +54,15 @@
         state: directory
         mode: 0777
 
-    - name: Create Apache config folder
+    - name: Create Apache01 config folder
       file:
-        path: "{{ folder_structure.path }}/apache/conf"
+        path: "{{ folder_structure.path }}/apache/conf/apache01"
+        state: directory
+        mode: 0755
+
+    - name: Create Apache02 config folder
+      file:
+        path: "{{ folder_structure.path }}/apache/conf/apache02"
         state: directory
         mode: 0755
 
@@ -118,61 +124,64 @@
         src: index.php
         dest: "{{ folder_structure.path }}/www/html/second"
 
-    - name: Copying Nginx config
-      template:
-        src: nginx.conf.j2
-        dest: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
-
-    - name: Copying Apache1 config
-      template:
-        src: apache1.conf.j2
-        dest: "{{ folder_structure.path }}/apache/conf/apache1.conf"
-
-    - name: Copying Apache2 config
-      template:
-        src: apache2.conf.j2
-        dest: "{{ folder_structure.path }}/apache/conf/apache2.conf"
-
     - name: Create Nginx Container
       docker_container:
         name: nginx
         image: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
         state: started
+        restart: always
         ports:
           - "80:80"
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.2
         volumes:
-          - "{{ folder_structure.path }}/nginx/conf:/etc/nginx/conf.d"
+          - "{{ folder_structure.path }}/nginx/conf:/etc/nginx/conf"
           - "{{ folder_structure.path }}/nginx/logs:/var/log/nginx"
 
     - name: Create Apache-PHP 7.2 Container-1
       docker_container:
-        name: apache1
+        name: apache01
         image: php:7.2-apache
         state: started
+        restart: always
         ports:
           - "8081:8081"
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.3
         volumes:
-          - "{{ folder_structure.path }}/apache/conf:/etc/apache2/sites-enabled"
+          - "{{ folder_structure.path }}/apache/conf/apache01:/etc/apache2"
           - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
           - "{{ folder_structure.path }}/www/html:/var/www/html"
 
     - name: Create Apache-PHP 7.2 Container-2
       docker_container:
-        name: apache2
+        name: apache02
         image: php:7.2-apache
         state: started
+        restart: always
         ports:
           - "8082:8082"
         networks:
           - name: custom_network
             ipv4_address: 10.0.0.4
         volumes:
-          - "{{ folder_structure.path }}/apache/conf:/etc/apache2/sites-enabled"
+          - "{{ folder_structure.path }}/apache/conf/apache02:/etc/apache2"
           - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
           - "{{ folder_structure.path }}/www/html:/var/www/html"
+
+    - name: Copying Nginx-proxy config
+        src: nginx.conf
+        dest: "{{ folder_structure.path }}/nginx/conf/nginx-proxy.conf"
+
+    - name: Copying Apache01 config
+        src: apache01.conf
+        dest: "{{ folder_structure.path }}/apache/conf/apache01/apache2.conf"
+
+    - name: Copying Apache02 config
+        src: apache01.conf
+        dest: "{{ folder_structure.path }}/apache/conf/apache02/apache2.conf"
+
+    - name: Restart containers
+      command: docker restart nginx apache1 apache2
