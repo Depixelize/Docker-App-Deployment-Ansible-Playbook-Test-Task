@@ -139,7 +139,7 @@
           - "{{ folder_structure.path }}/nginx/conf:/etc/nginx/conf"
           - "{{ folder_structure.path }}/nginx/logs:/var/log/nginx"
 
-    - name: Create Apache-PHP 7.2 Container-1
+    - name: Create Apache-PHP 7.2 Container-01
       docker_container:
         name: apache01
         image: php:7.2-apache
@@ -155,7 +155,7 @@
           - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
           - "{{ folder_structure.path }}/www/html:/var/www/html"
 
-    - name: Create Apache-PHP 7.2 Container-2
+    - name: Create Apache-PHP 7.2 Container-02
       docker_container:
         name: apache02
         image: php:7.2-apache
@@ -172,14 +172,17 @@
           - "{{ folder_structure.path }}/www/html:/var/www/html"
 
     - name: Copying Nginx-proxy config
+      copy:
         src: nginx.conf
         dest: "{{ folder_structure.path }}/nginx/conf/nginx-proxy.conf"
 
     - name: Copying Apache01 config
+      copy:
         src: apache01.conf
         dest: "{{ folder_structure.path }}/apache/conf/apache01/apache2.conf"
 
     - name: Copying Apache02 config
+      copy:
         src: apache01.conf
         dest: "{{ folder_structure.path }}/apache/conf/apache02/apache2.conf"
 
