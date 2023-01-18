@@ -138,9 +138,6 @@
         volumes:
           - "{{ folder_structure.path }}/nginx/conf:/etc/nginx"
           - "{{ folder_structure.path }}/nginx/logs:/var/log/nginx"
-        copy:
-          src: nginx.conf
-          dest: /etc/nginx/nginx.conf
 
     - name: Create Apache-PHP 7.2 Container-01
       docker_container:
@@ -180,17 +177,26 @@
           src: apache2.conf
           dest: /etc/apache2/apache2.conf
 
+    - name: Copy Nginx config w/o logs to nginx container
+      command: docker cp nginx.conf nginx:/etc/nginx
+
+    - name: Copy Apache config w/o ports to apache01 container
+      command: docker cp apache2.conf apache01:/etc/apache2/apache2.conf
+
+    - name: Copy Apache config w/o ports to apache02 container
+      command: docker cp apache2.conf apache02:/etc/apache2/apache2.conf
+
     - name: Copying Nginx-proxy config
       copy:
         src: nginx.conf
         dest: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
 
-    - name: Copying Apache01 config
+    - name: Copying Apache01 first.tst virtual server config
       copy:
         src: apache01.conf
         dest: "{{ folder_structure.path }}/apache/conf/apache01/apache2.conf"
 
-    - name: Copying Apache02 config
+    - name: Copying Apache02 second.tst virtual server config
       copy:
         src: apache02.conf
         dest: "{{ folder_structure.path }}/apache/conf/apache02/apache2.conf"
