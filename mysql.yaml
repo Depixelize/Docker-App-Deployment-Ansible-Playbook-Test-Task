@@ -1,0 +1,78 @@
+- name: Install MySQL Docker Container
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Pull MySQL Docker Image
+      docker_image:
+        name: mysql:5.7
+        source: pull
+        state: present
+
+    - name: Create MySQL Container
+      docker_container:
+        name: mysql
+        image: mysql:5.7
+        state: started
+        ports:
+          - "3306:3306"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.5
+        volumes:
+          - "{{ folder_structure.path }}/mysql/conf:/etc/mysql/conf.d"
+          - "{{ folder_structure.path }}/mysql/logs:/var/log/mysql"
+        env:
+          MYSQL_ROOT_PASSWORD: root
+
+    - name: Create database
+      mysql_db:
+        name: log_db
+        state: present
+
+    - name: Create table
+      mysql_db:
+        name: log_db
+        state: present
+        sql: |
+          CREATE TABLE IF NOT EXISTS log_table (
+            timestamp VARCHAR(255) NOT NULL,
+            request_time VARCHAR(255) NOT NULL,
+            upstream_time VARCHAR(255) NOT NULL,
+            remote_addr VARCHAR(255) NOT NULL,
+            remote_user VARCHAR(255) NOT NULL,
+            time_local VARCHAR(255) NOT NULL,
+            request VARCHAR(255) NOT NULL,
+            status VARCHAR(255) NOT NULL,
+            body_bytes_sent VARCHAR(255) NOT NULL,
+            http_referer VARCHAR(255) NOT NULL,
+            http_user_agent VARCHAR(255) NOT NULL,
+            geoip_country_code VARCHAR(255) NOT NULL
+          );
+
+    - name: Pull Fluentd Docker Image
+      docker_image:
+        name: fluent/fluentd
+        source: pull
+        state: present
+
+    - name: Create Fluentd Container
+      docker_container:
+        name: fluentd
+        image: fluent/fluentd
+        state: started
+        ports:
+          - "24224:24224"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.6
+        volumes:
+          - "{{ folder_structure.path }}/fluentd/conf:/fluentd/etc"
+          - "{{ folder_structure.path }}/nginx/logs:/fluentd/log"
+
+    - name: Copying Fluentd config
+      template:
+        src: fluentd.conf
+        dest: "{{ folder_structure.path }}/fluentd/conf/fluentd.conf"
+
+    - name: Restart containers
+      command: docker restart mysql fluentd
