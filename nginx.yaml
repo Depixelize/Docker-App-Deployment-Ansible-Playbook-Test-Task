@@ -84,6 +84,12 @@
         state: directory
         mode: 0755
 
+    - name: Create Fluentd config folder
+      file:
+        path: "{{ folder_structure.path }}/fluentd/conf
+        state: directory
+        mode: 0755
+
     - name: Create content folder
       file:
         path: "{{ folder_structure.path }}/www/html"
