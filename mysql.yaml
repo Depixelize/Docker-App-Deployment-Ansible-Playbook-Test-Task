@@ -2,6 +2,12 @@
   hosts: localhost
   become: true
   tasks:
+    - name: Create Fluentd config folder
+      file:
+        path: "{{ folder_structure.path }}/fluentd/conf
+        state: directory
+        mode: 0755
+
     - name: Pull MySQL Docker Image
       docker_image:
         name: mysql:5.7
