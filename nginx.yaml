@@ -182,18 +182,18 @@
 
     - name: Copying Nginx-proxy config
       copy:
-        src: nginx.conf
+        src: nginx-proxy.conf
         dest: "{{ folder_structure.path }}/nginx/conf/nginx.conf"
 
     - name: Copying Apache01 first.tst virtual server config
       copy:
         src: apache01.conf
-        dest: "{{ folder_structure.path }}/apache/conf/apache01/apache2.conf"
+        dest: "{{ folder_structure.path }}/apache/conf/apache01/apache01.conf"
 
     - name: Copying Apache02 second.tst virtual server config
       copy:
         src: apache02.conf
-        dest: "{{ folder_structure.path }}/apache/conf/apache02/apache2.conf"
+        dest: "{{ folder_structure.path }}/apache/conf/apache02/apache02.conf"
 
     - name: Restart containers
       command: docker restart nginx apache01 apache02
