@@ -187,4 +187,4 @@
         dest: "{{ folder_structure.path }}/apache/conf/apache02/apache2.conf"
 
     - name: Restart containers
-      command: docker restart nginx apache1 apache2
+      command: docker restart nginx apache01 apache02
