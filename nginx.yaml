@@ -154,9 +154,6 @@
           - "{{ folder_structure.path }}/apache/conf/apache01:/etc/apache2/sites-enabled"
           - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
           - "{{ folder_structure.path }}/www/html:/var/www/html"
-        copy:
-          src: apache2.conf
-          dest: /etc/apache2/apache2.conf
 
     - name: Create Apache-PHP 7.2 Container-02
       docker_container:
@@ -173,9 +170,6 @@
           - "{{ folder_structure.path }}/apache/conf/apache02:/etc/apache2/sites-enabled"
           - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
           - "{{ folder_structure.path }}/www/html:/var/www/html"
-        copy:
-          src: apache2.conf
-          dest: /etc/apache2/apache2.conf
 
     - name: Copy Nginx config w/o logs to nginx container
       command: docker cp nginx.conf nginx:/etc/nginx
