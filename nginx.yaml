@@ -151,7 +151,7 @@
           - name: custom_network
             ipv4_address: 10.0.0.3
         volumes:
-          - "{{ folder_structure.path }}/apache/conf/apache01:/etc/apache2"
+          - "{{ folder_structure.path }}/apache/conf/apache01:/etc/apache2/sites-enabled"
           - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
           - "{{ folder_structure.path }}/www/html:/var/www/html"
 
@@ -167,7 +167,7 @@
           - name: custom_network
             ipv4_address: 10.0.0.4
         volumes:
-          - "{{ folder_structure.path }}/apache/conf/apache02:/etc/apache2"
+          - "{{ folder_structure.path }}/apache/conf/apache02:/etc/apache2/sites-enabled"
           - "{{ folder_structure.path }}/apache/logs:/var/log/apache2"
           - "{{ folder_structure.path }}/www/html:/var/www/html"
 
@@ -183,7 +183,7 @@
 
     - name: Copying Apache02 config
       copy:
-        src: apache01.conf
+        src: apache02.conf
         dest: "{{ folder_structure.path }}/apache/conf/apache02/apache2.conf"
 
     - name: Restart containers
