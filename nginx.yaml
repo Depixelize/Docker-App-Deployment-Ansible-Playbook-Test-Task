@@ -11,6 +11,12 @@
 
     - name: Install Python Pip
       apt:
+        name: python3-mysqldb
+        state: present
+      register: python_mysqldb_install
+
+    - name: Install Python Pip
+      apt:
         name: python3-pip
         state: present
       register: python_pip_install
@@ -80,6 +86,12 @@
     - name: Create MySQL logs folder
       file:
         path: "/srv/mysql/logs"
+        state: directory
+        mode: 0755
+
+    - name: Create MySQL pid folder
+      file:
+        path: "/srv/mysql/mysqld"
         state: directory
         mode: 0755
 
