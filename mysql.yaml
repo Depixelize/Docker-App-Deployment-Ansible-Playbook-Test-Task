@@ -8,6 +8,9 @@
         source: pull
         state: present
 
+    - name: Copy my cnf to mysql container
+      command: docker cp ./my.cnf mysql:/root/
+
     - name: Create MySQL Container
       docker_container:
         name: mysql
@@ -24,9 +27,6 @@
           - "/srv/mysql/mysqld:/var/run/mysqld"
         env:
           MYSQL_ROOT_PASSWORD: very_secret
-
-    - name: Copy my cnf to mysql container
-      command: docker cp ./my.cnf mysql:/root/
 
     - name: Set password for root user
       mysql_user:
@@ -85,7 +85,7 @@
     - name: Create Fluentd Container
       docker_container:
         name: fluentd
-        image: fluent/fluentd
+        image: theasp/fluentd-plugins:certified
         state: started
         ports:
           - "24224:24224"
@@ -98,8 +98,8 @@
 
     - name: Copying Fluentd config
       template:
-        src: fluentd.conf
-        dest: "/srv/fluentd/conf/fluentd.conf"
+        src: fluent.conf
+        dest: "/srv/fluentd/conf/fluent.conf"
 
     - name: Restart containers
       command: docker restart mysql fluentd
