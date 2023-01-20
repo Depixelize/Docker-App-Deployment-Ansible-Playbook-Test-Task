@@ -39,7 +39,6 @@
         host: 'localhost'
         login_unix_socket: /srv/mysql/mysqld/mysqld.sock
         state: present
-        
     - name: Create database
       mysql_db:
         name: log_db
