@@ -1,27 +1,57 @@
 <source>
+
   @type tail
+
   path /fluentd/log/access.log
+
   pos_file /fluentd/log/access.log.pos
+
   tag nginx.access
+
   format ltsv
+
   time_format %d/%b/%Y:%H:%M:%S %z
+
 </source>
 
+
+
 <match nginx.access>
+
   @type copy
+
   <store>
+
     @type sql
+
     host 10.0.0.5
+
     adapter mysql2
+
     port 3306
+
     username root
+
     password very_secret
+
     database log_db
+
     table log_table
+
     flush_interval 10s
+
   <table>
+
     table log_table
-    column_mapping 'remote_addr:remote_address, remote_user:remote_user, time_local:time_local, request:request, status:status, body_bytes_sent:body_bytes_sent, http_referer:http_referer, http_user_agent:http_user_agent, request_time:request_time, upstream_response_time:upstream_response_time, geoip2_data_country_iso:geoip2_data_country_iso'
+
+    column_mapping 'remote_addr:remote_address, remote_user:remote_user, time_local:time_local, request:request, status:status, 
+
+ body_bytes_sent:body_bytes_sent, http_referer:http_referer, http_user_agent:http_user_agent, 
+
+request_time:request_time, upstream_response_time:upstream_response_time, geoip2_data_country_iso:geoip2_data_country_iso'
+
   </table>
+
   </store>
+
 </match>
