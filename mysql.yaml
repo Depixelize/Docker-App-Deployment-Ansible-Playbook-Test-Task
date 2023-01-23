@@ -24,10 +24,7 @@
           - "/srv/mysql/mysqld:/var/run/mysqld"
         env:
           MYSQL_ROOT_PASSWORD: very_secret
-          
-    - name: Copy my cnf to mysql container
-      command: docker cp ./my.cnf mysql:/root/
-      
+        
     - name: Pull Fluentd Docker Image
       docker_image:
         name: theasp/fluentd-plugins:all
@@ -52,7 +49,15 @@
       template:
         src: fluent.conf
         dest: "/srv/fluentd/conf/fluent.conf"
-        
+
+    - name: Wait for mysql to start
+      wait_for:
+        port: 3306
+        state: started
+
+    - name: Copy my cnf to mysql container
+      command: docker cp ./my.cnf mysql:/root/        
+
     - name: Set password for root user
       mysql_user:
         name: "root"
