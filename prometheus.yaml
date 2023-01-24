@@ -44,10 +44,10 @@
           state: present
 
 
-    - name: Copying Prometheus config
-      copy:
-        src: prometheus.yml
-        dest: "/srv/prometheus/conf/prometheus.yml"
+      - name: Copying Prometheus config
+        copy:
+          src: prometheus.yml
+          dest: "/srv/prometheus/conf/prometheus.yml"
 
       - name: Create Prometheus Container
         docker_container:
