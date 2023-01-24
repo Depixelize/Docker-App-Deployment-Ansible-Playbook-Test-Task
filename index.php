@@ -8,8 +8,7 @@ sleep($sleep_time);
 $end_time = microtime(true);
 $execution_time = $end_time - $start_time;
 
-$url = parse_url($_SERVER['HTTP_HOST']);
-$hostname = $url['host'];
+$hostname = $_SERVER['HTTP_X_FORWARDED_HOST'];
 
 $php_version = phpversion();
 
