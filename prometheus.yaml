@@ -70,8 +70,6 @@
           networks:
             - name: custom_network
               ipv4_address: 10.0.0.9
-          volumes:
-            - "/srv/grafana:/var/lib/grafana"
 
       - name: Create Cadvisor Container
         docker_container:
