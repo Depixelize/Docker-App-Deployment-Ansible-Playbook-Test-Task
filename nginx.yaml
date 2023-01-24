@@ -101,6 +101,18 @@
         state: directory
         mode: 0755
 
+    - name: Create Prometheus config folder
+      file:
+        path: "/srv/prometheus/conf"
+        state: directory
+        mode: 0755
+
+    - name: Create Grafana folder
+      file:
+        path: "/srv/grafana"
+        state: directory
+        mode: 0755
+
     - name: Create content folder
       file:
         path: "/srv/www/html"
@@ -117,6 +129,18 @@
       lineinfile:
         path: /etc/hosts
         line: "127.0.0.1 second.tst"
+        state: present
+
+    - name: Create first.tst domain
+      lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 prometheus.tst"
+        state: present
+
+    - name: Create first.tst domain
+      lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 grafana.tst"
         state: present
 
     - name: Create first.tst folder

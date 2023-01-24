@@ -100,5 +100,11 @@
             geoip_country VARCHAR(2) NOT NULL            
           );
 
+    - name: Change permissions of /srv/nginx/
+      file:
+        path: /srv/nginx/
+        mode: 0777
+        recurse: yes
+
     - name: Restart containers
-      command: docker restart mysql fluentd
+      command: docker restart mysql fluentd nginx

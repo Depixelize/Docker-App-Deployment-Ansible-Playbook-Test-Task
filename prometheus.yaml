@@ -43,6 +43,12 @@
           source: pull
           state: present
 
+
+    - name: Copying Prometheus config
+      copy:
+        src: prometheus.yml
+        dest: "/srv/prometheus/conf/prometheus.yml"
+
       - name: Create Prometheus Container
         docker_container:
           name: prometheus
@@ -52,11 +58,7 @@
             - name: custom_network
               ipv4_address: 10.0.0.8
           volumes:
-            - "/path/to/prometheus/config:/etc/prometheus"
-            - "/path/to/prometheus/data:/prometheus"
-          env:
-            TZ: 'Europe/Berlin'
-            ARGS: --config.file=/etc/prometheus/prometheus.yml
+            - "/srv/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml"
 
       - name: Create Grafana Container
         docker_container:
@@ -69,7 +71,7 @@
             - name: custom_network
               ipv4_address: 10.0.0.9
           volumes:
-            - "/path/to/grafana/data:/var/lib/grafana"
+            - "/srv/grafana:/var/lib/grafana"
 
       - name: Create Cadvisor Container
         docker_container:
