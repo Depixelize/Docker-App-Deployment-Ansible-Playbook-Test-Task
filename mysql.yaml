@@ -69,8 +69,6 @@
         host: 'localhost'
         login_unix_socket: /srv/mysql/mysqld/mysqld.sock
         state: present
-        retries: 10
-        delay: 10
 
     - name: Create database
       mysql_db:
