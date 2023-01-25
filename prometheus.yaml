@@ -39,7 +39,7 @@
 
       - name: Pull Cadvisor Docker Image
         docker_image:
-          name: google/cadvisor
+          name: gcr.io/cadvisor/cadvisor:v0.46.0
           source: pull
           state: present
 
@@ -74,7 +74,7 @@
       - name: Create Cadvisor Container
         docker_container:
           name: cadvisor
-          image: google/cadvisor
+          image: gcr.io/cadvisor/cadvisor:v0.46.0
           state: started
           networks:
             - name: custom_network
