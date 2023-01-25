@@ -15,7 +15,7 @@
           state: started
           networks:
             - name: custom_network
-              ipv4_address: 10.0.0.8
+              ipv4_address: 10.0.0.9
           volumes:
             - "/proc:/host/proc"
             - "/sys:/host/sys"
@@ -56,7 +56,7 @@
           state: started
           networks:
             - name: custom_network
-              ipv4_address: 10.0.0.9
+              ipv4_address: 10.0.0.10
           volumes:
             - "/srv/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml"
 
@@ -69,7 +69,7 @@
             - "3000:3000"
           networks:
             - name: custom_network
-              ipv4_address: 10.0.0.10
+              ipv4_address: 10.0.0.11
 
       - name: Create Cadvisor Container
         docker_container:
@@ -78,7 +78,7 @@
           state: started
           networks:
             - name: custom_network
-              ipv4_address: 10.0.0.11
+              ipv4_address: 10.0.0.12
           volumes:
             - "/:/rootfs:ro"
             - "/var/run:/var/run:rw"
