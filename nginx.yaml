@@ -231,8 +231,7 @@
             ipv4_address: 10.0.0.5
         volumes:
           - "/srv/nginx/conf:/etc/nginx/conf.d"
-        environment:
-          - NGINX_STATUS_URL=http://10.0.0.2:8080/metrics
+        command: -nginx.scrape_uri=http://10.0.0.2:8080/metrics
 
     - name: Copy Nginx config w/o logs to nginx container
       command: docker cp nginx.conf nginx:/etc/nginx
