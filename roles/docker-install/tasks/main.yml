@@ -7,6 +7,12 @@
 
 - name: Install Python Pip
   apt:
+    name: python3-mysqldb
+    state: present
+  register: python_mysqldb_install
+
+- name: Install Python Pip
+  apt:
     name: python3-pip
     state: present
   register: python_pip_install
