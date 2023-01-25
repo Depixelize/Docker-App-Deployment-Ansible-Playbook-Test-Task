@@ -232,7 +232,7 @@
         volumes:
           - "/srv/nginx/conf:/etc/nginx/conf.d"
         env:
-          - SCRAPE_URI=http://10.0.0.2:8080/metrics
+          SCRAPE_URI: "http://10.0.0.2:8080/metrics"
 
     - name: Copy Nginx config w/o logs to nginx container
       command: docker cp nginx.conf nginx:/etc/nginx
