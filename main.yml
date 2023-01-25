@@ -1,5 +1,9 @@
 - name: Deploy Infrastructure Stack
   hosts: localhost
+  vars files:
+    - /vars/folders.yml
+    - /vars/network.yml
+    - /vars/domains.yml
   become: true
   roles:
     - role: docker-install

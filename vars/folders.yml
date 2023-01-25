@@ -12,5 +12,3 @@ fluentd_config_path: "/srv/fluentd/conf"
 prometheus_config_path: "/srv/prometheus/conf"
 grafana_path: "/srv/grafana"
 content_path: "/srv/www/html"
-subnet: 10.0.0.0/24
-network_name: custom_network
