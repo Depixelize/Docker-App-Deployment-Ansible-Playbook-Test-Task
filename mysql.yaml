@@ -99,7 +99,7 @@
             request VARCHAR(255) NOT NULL,
             status VARCHAR(255) NOT NULL,
             body_bytes_sent INT NOT NULL,
-            referrer VARCHAR(255) NOT NULL,
+            referrer TEXT NOT NULL,
             user_agent VARCHAR(255) NOT NULL,
             request_time FLOAT NOT NULL,
             upstream_response_time FLOAT NOT NULL,
