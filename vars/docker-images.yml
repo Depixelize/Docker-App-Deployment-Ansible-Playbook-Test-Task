@@ -1,2 +1,3 @@
 ---
 apache_image: "php:7.2-apache"
+nginx_image: "admintuts/nginx:1.21.4-rtmp-geoip2-alpine"

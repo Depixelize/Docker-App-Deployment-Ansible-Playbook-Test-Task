@@ -1,0 +1,32 @@
+---
+- name: Pull Nginx with Geoip Docker Image
+  docker_image:
+    name: "{{ nginx_image }}"
+    source: pull
+    state: present
+
+- name: Create Nginx Container
+  docker_container:
+    name: nginx
+    image: "{{ nginx_image }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "80:80"
+    networks:
+      - name: custom_network
+        ipv4_address: "{{ nginx_ip }}"
+    volumes:
+      - "{{ nginx_config_path }}:/etc/nginx/conf.d"
+      - "{{ nginx_logs_path }}:/var/log/nginx"
+
+- name: Copy Nginx config w/o logs to nginx container
+  command: docker cp ./roles/nginx-install/defaults/nginx.conf nginx:/etc/nginx
+
+- name: Copying Nginx-proxy config
+  copy:
+    src: ./roles/nginx-install/defaults/nginx-proxy.conf
+    dest: "{{ nginx_config_path }}/nginx.conf"
+
+- name: Restart containers
+  command: docker restart nginx
