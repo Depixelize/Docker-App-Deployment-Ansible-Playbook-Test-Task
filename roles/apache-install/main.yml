@@ -1,57 +1,56 @@
-    - name: Pull Apache-PHP 7.2 Docker Image
-      docker_image:
-        name: {{ apache_image }}
-        source: pull
-        state: present
+- name: Pull Apache-PHP 7.2 Docker Image
+  docker_image:
+    name: {{ apache_image }}
+    source: pull
+    state: present
 
-    - name: Create Apache-PHP 7.2 Container-01
-      docker_container:
-        name: apache01
-        image: {{ apache_image }}
-        state: started
-        restart_policy: always
-        ports:
-          - "8081:8081"
-        networks:
-          - name: custom_network
-            ipv4_address: {{ apache01_ip }}
-        volumes:
-          - "{{ apache01_config_path }}:/etc/apache2/sites-enabled"
-          - "{{ apache_logs_path }}:/var/log/apache2"
-          - "{{ content_path }}:/var/www/html"
+- name: Create Apache-PHP 7.2 Container-01
+  docker_container:
+    name: apache01
+    image: {{ apache_image }}
+    state: started
+    restart_policy: always
+    ports:
+      - "8081:8081"
+    networks:
+      - name: custom_network
+    ipv4_address: {{ apache01_ip }}
+    volumes:
+      - "{{ apache01_config_path }}:/etc/apache2/sites-enabled"
+      - "{{ apache_logs_path }}:/var/log/apache2"
+      - "{{ content_path }}:/var/www/html"
 
-    - name: Create Apache-PHP 7.2 Container-02
-      docker_container:
-        name: apache02
-        image: {{ apache_image }}
-        state: started
-        restart_policy: always
-        ports:
-          - "8082:8082"
-        networks:
-          - name: custom_network
-            ipv4_address: {{ apache02_ip }}
-        volumes:
-          - "{{ apache02_config_path }}:/etc/apache2/sites-enabled"
-          - "{{ apache_logs_path }}:/var/log/apache2"
-          - "{{ content_path }}:/var/www/html"
+- name: Create Apache-PHP 7.2 Container-02
+  docker_container:
+    name: apache02
+    image: {{ apache_image }}
+    state: started
+    restart_policy: always
+    ports:
+      - "8082:8082"
+    networks:
+      - name: custom_network
+    ipv4_address: {{ apache02_ip }}
+    volumes:
+      - "{{ apache02_config_path }}:/etc/apache2/sites-enabled"
+      - "{{ apache_logs_path }}:/var/log/apache2"
+      - "{{ content_path }}:/var/www/html"
 
-    - name: Copy Apache config w/o ports to apache01 container
-      command: docker cp apache2.conf apache01:/etc/apache2/apache2.conf
+- name: Copy Apache config w/o ports to apache01 container
+  command: docker cp ./defaults/apache2.conf apache01:/etc/apache2/apache2.conf
 
-    - name: Copy Apache config w/o ports to apache02 container
-      command: docker cp apache2.conf apache02:/etc/apache2/apache2.conf
+- name: Copy Apache config w/o ports to apache02 container
+  command: docker cp ./defaults/apache2.conf apache02:/etc/apache2/apache2.conf
 
-    - name: Copying Apache01 first.tst virtual server config
-      copy:
-        src: apache01.conf
-        dest: "{{ apache01_config_path }}/apache01.conf"
+- name: Copying Apache01 first.tst virtual server config
+  copy:
+    src: ./defaults/apache01.conf
+    dest: "{{ apache01_config_path }}/apache01.conf"
 
-    - name: Copying Apache02 second.tst virtual server config
-      copy:
-        src: apache02.conf
-        dest: "{{ apache02_config_path }}/apache02.conf"
+- name: Copying Apache02 second.tst virtual server config
+  copy:
+    src: ./defaults/apache02.conf
+    dest: "{{ apache02_config_path }}/apache02.conf"
 
-    - name: Restart containers
-      command: docker restart apache01 apache02
-
+- name: Restart containers
+  command: docker restart apache01 apache02
