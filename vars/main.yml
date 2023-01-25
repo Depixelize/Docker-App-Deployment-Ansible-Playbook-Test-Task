@@ -1,0 +1,16 @@
+---
+folder_structure_path: "/srv"
+nginx_config_path: "/srv/nginx/conf"
+nginx_logs_path: "/srv/nginx/logs"
+apache01_config_path: "/srv/apache/conf/apache01"
+apache02_config_path: "/srv/apache/conf/apache02"
+apache_logs_path: "/srv/apache/logs"
+mysql_config_path: "/srv/mysql/conf"
+mysql_logs_path: "/srv/mysql/logs"
+mysql_pid_path: "/srv/mysql/mysqld"
+fluentd_config_path: "/srv/fluentd/conf"
+prometheus_config_path: "/srv/prometheus/conf"
+grafana_path: "/srv/grafana"
+content_path: "/srv/www/html"
+subnet: 10.0.0.0/24
+network_name: custom_network

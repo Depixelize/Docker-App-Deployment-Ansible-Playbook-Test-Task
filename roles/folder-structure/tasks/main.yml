@@ -1,0 +1,78 @@
+---
+- name: Create folder structure
+  file:
+    path: "{{ folder_structure_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create Nginx config folder
+  file:
+    path: "{{ nginx_config_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create Nginx logs folder
+  file:
+    path: "{{ nginx_logs_path }}"
+    state: directory
+    mode: 0777
+
+- name: Create Apache01 config folder
+  file:
+    path: "{{ apache01_config_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create Apache02 config folder
+  file:
+    path: "{{ apache02_config_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create Apache logs folder
+  file:
+    path: "{{ apache_logs_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create MySQL config folder
+  file:
+    path: "{{ mysql_config_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create MySQL logs folder
+  file:
+    path: "{{ mysql_logs_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create MySQL pid folder
+  file:
+    path: "{{ mysql_pid_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create Fluentd config folder
+  file:
+    path: "{{ fluentd_config_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create Prometheus config folder
+  file:
+    path: "{{ prometheus_config_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create Grafana folder
+  file:
+    path: "{{ grafana_path }}"
+    state: directory
+    mode: 0755
+
+- name: Create content folder
+  file:
+    path: "{{ content_path }}"
+    state: directory
+    mode: 0755

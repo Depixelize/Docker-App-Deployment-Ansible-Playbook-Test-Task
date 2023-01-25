@@ -1,0 +1,19 @@
+- name: Deploy Infrastructure Stack
+  hosts: localhost
+  become: true
+  roles:
+    - role: docker-install
+    - role: folder-structure
+    - role: network-create
+    - role: domain-create
+    - role: apache-install
+    - role: nginx-install
+    - role: mysql-install
+    - role: fluentd-install
+    - role: node-exporter-install
+    - role: mysql-exporter-install
+    - role: nginx-exporter-install
+    - role: cadvisor-install
+    - role: prometheus-install
+    - role: grafana-install
+  tasks:

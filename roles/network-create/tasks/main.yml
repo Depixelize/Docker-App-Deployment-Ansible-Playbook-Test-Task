@@ -1,0 +1,3 @@
+---
+- name: Create custom Docker network
+  command: docker network create --subnet={{ subnet }} {{ network_name }}

@@ -1,0 +1,17 @@
+---
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+  register: docker_install
+
+- name: Install Python Pip
+  apt:
+    name: python3-pip
+    state: present
+  register: python_pip_install
+
+- name: Install Docker-py
+  pip:
+    name: docker-py
+    state: present
