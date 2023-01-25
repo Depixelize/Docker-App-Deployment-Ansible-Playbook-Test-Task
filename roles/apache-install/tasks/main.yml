@@ -54,5 +54,15 @@
     src: ./roles/apache-install/defaults/apache02.conf
     dest: "{{ apache02_config_path }}/apache02.conf"
 
+- name: Copying index.php to first.tst 
+  copy:
+    src: ./roles/apache-install/defaults/index.php
+    dest: "{{ content_path }}/first/"
+
+- name: Copying index.php to second.tst 
+  copy:
+    src: ./roles/apache-install/defaults/index.php
+    dest: "{{ content_path }}/second/"
+
 - name: Restart containers
   command: docker restart apache01 apache02

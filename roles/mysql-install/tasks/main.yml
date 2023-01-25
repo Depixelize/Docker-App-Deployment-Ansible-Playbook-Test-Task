@@ -16,9 +16,9 @@
       - name: custom_network
         ipv4_address: "{{ mysql_ip }}"
     volumes:
-      - "/srv/mysql/conf:/etc/mysql/conf.d"
-      - "/srv/mysql/logs:/var/log/mysql"
-      - "/srv/mysql/mysqld:/var/run/mysqld"
+      - "{{ mysql_config_path }}:/etc/mysql/conf.d"
+      - "{{ mysql_logs_path }}:/var/log/mysql"
+      - "{{ mysql_pid_path }}:/var/run/mysqld"
     env:
       MYSQL_ROOT_PASSWORD: very_secret
 
@@ -61,15 +61,15 @@
     login_unix_socket: "{{ mysql_pid_path }}/mysqld.sock"
     query: |
       CREATE TABLE IF NOT EXISTS log_table (
-    remote_addr VARCHAR(45) NOT NULL,
-    hostname VARCHAR(255) NOT NULL,
-    time_local VARCHAR(255) NOT NULL,
-    request VARCHAR(255) NOT NULL,
-    status VARCHAR(255) NOT NULL,
-    body_bytes_sent INT NOT NULL,
-    referrer TEXT NOT NULL,
-    user_agent VARCHAR(255) NOT NULL,
-    request_time FLOAT NOT NULL,
-    upstream_response_time FLOAT NOT NULL,
-    geoip_country VARCHAR(2) NOT NULL    
+        remote_addr VARCHAR(45) NOT NULL,
+        hostname VARCHAR(255) NOT NULL,
+        time_local VARCHAR(255) NOT NULL,
+        request VARCHAR(255) NOT NULL,
+        status VARCHAR(255) NOT NULL,
+        body_bytes_sent INT NOT NULL,
+        referrer TEXT NOT NULL,
+        user_agent VARCHAR(255) NOT NULL,
+        request_time FLOAT NOT NULL,
+        upstream_response_time FLOAT NOT NULL,
+        geoip_country VARCHAR(2) NOT NULL    
       );
