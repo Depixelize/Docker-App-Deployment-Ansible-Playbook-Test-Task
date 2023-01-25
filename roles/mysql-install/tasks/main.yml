@@ -14,7 +14,7 @@
       - "3306:3306"
     networks:
       - name: custom_network
-      ipv4_address: "{{ mysql_ip }}"
+        ipv4_address: "{{ mysql_ip }}"
     volumes:
       - "/srv/mysql/conf:/etc/mysql/conf.d"
       - "/srv/mysql/logs:/var/log/mysql"
