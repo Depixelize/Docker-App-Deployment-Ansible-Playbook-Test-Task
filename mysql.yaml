@@ -17,7 +17,7 @@
           - "3306:3306"
         networks:
           - name: custom_network
-            ipv4_address: 10.0.0.5
+            ipv4_address: 10.0.0.6
         volumes:
           - "/srv/mysql/conf:/etc/mysql/conf.d"
           - "/srv/mysql/logs:/var/log/mysql"
@@ -40,7 +40,7 @@
           - "24224:24224"
         networks:
           - name: custom_network
-            ipv4_address: 10.0.0.6
+            ipv4_address: 10.0.0.7
         volumes:
           - "/srv/fluentd/conf:/fluentd/etc"
           - "/srv/nginx/logs:/fluentd/log"

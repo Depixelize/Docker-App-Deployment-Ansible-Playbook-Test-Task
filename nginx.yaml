@@ -32,9 +32,15 @@
         source: pull
         state: present
 
-    - name: Pull Nginx Docker Image
+    - name: Pull Nginx with Geoip Docker Image
       docker_image:
         name: admintuts/nginx:1.21.4-rtmp-geoip2-alpine
+        source: pull
+        state: present
+
+    - name: Pull Nginx-Exporter for Prometheus
+      docker_image:
+        name: nginx/nginx-prometheus-exporter
         source: pull
         state: present
 
@@ -212,6 +218,20 @@
           - "/srv/apache/logs:/var/log/apache2"
           - "/srv/www/html:/var/www/html"
 
+    - name: Install Nginx Exporter
+      docker_container:
+        name: nginx_exporter
+        image: nginx/nginx-prometheus-exporter
+        state: started
+        restart_policy: always
+        ports:
+          - "9113:9113"
+        networks:
+          - name: custom_network
+            ipv4_address: 10.0.0.5
+        volumes:
+          - "/srv/nginx/conf:/etc/nginx/conf.d"
+
     - name: Copy Nginx config w/o logs to nginx container
       command: docker cp nginx.conf nginx:/etc/nginx
 
@@ -237,4 +257,4 @@
         dest: "/srv/apache/conf/apache02/apache02.conf"
 
     - name: Restart containers
-      command: docker restart nginx apache01 apache02
+      command: docker restart nginx apache01 apache02 nginx_exporter
