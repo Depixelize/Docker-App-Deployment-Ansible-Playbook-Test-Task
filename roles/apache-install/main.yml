@@ -1,3 +1,4 @@
+---
 - name: Pull Apache-PHP 7.2 Docker Image
   docker_image:
     name: {{ apache_image }}
