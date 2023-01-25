@@ -1,0 +1,75 @@
+---
+- name: Pull MySQL Docker Image
+  docker_image:
+    name: "{{ mysql_image }}"
+    source: pull
+    state: present
+
+- name: Create MySQL Container
+  docker_container:
+    name: mysql
+    image: "{{ mysql_image }}"
+    state: started
+    ports:
+      - "3306:3306"
+    networks:
+      - name: custom_network
+      ipv4_address: "{{ mysql_ip }}"
+    volumes:
+      - "/srv/mysql/conf:/etc/mysql/conf.d"
+      - "/srv/mysql/logs:/var/log/mysql"
+      - "/srv/mysql/mysqld:/var/run/mysqld"
+    env:
+      MYSQL_ROOT_PASSWORD: very_secret
+
+- name: Wait for database to be available
+  shell: docker run --rm --link mysql:mysql mysql sh -c 'mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"very_secret" || true'
+  register: result
+  until: result.stderr.find("Can't connect to MySQL") == -1
+  retries: 10
+  delay: 3
+
+- name: Copy my cnf to mysql container
+  command: docker cp ./roles/mysql-install/defaults/my.cnf mysql:/root/
+
+- name: Set password for root user
+  mysql_user:
+    name: "root"
+    login_user: "root"
+    login_password: "very_secret"
+    password: "very_secret"
+    config_file: "/root/my.cnf"
+    priv: '*.*:ALL,GRANT'
+    host: 'localhost'
+    login_unix_socket: "{{ mysql_pid_path }}/mysqld.sock"
+    state: present
+
+- name: Create database
+  mysql_db:
+    name: log_db
+    login_user: "root"
+    login_password: "very_secret"
+    config_file: "/root/my.cnf"
+    login_unix_socket: "{{ mysql_pid_path }}/mysqld.sock"
+    state: present
+    
+- name: Create table
+  mysql_query:
+    login_db: log_db
+    login_user: "root"
+    login_password: "very_secret"
+    login_unix_socket: "{{ mysql_pid_path }}/mysqld.sock"
+    query: |
+      CREATE TABLE IF NOT EXISTS log_table (
+    remote_addr VARCHAR(45) NOT NULL,
+    hostname VARCHAR(255) NOT NULL,
+    time_local VARCHAR(255) NOT NULL,
+    request VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    body_bytes_sent INT NOT NULL,
+    referrer TEXT NOT NULL,
+    user_agent VARCHAR(255) NOT NULL,
+    request_time FLOAT NOT NULL,
+    upstream_response_time FLOAT NOT NULL,
+    geoip_country VARCHAR(2) NOT NULL    
+      );
