@@ -37,19 +37,19 @@
           - "{{ content_path }}:/var/www/html"
 
     - name: Copy Apache config w/o ports to apache01 container
-      command: docker cp ./defaults/apache2.conf apache01:/etc/apache2/apache2.conf
+      command: docker cp ./configs/apache2.conf apache01:/etc/apache2/apache2.conf
 
     - name: Copy Apache config w/o ports to apache02 container
-      command: docker cp ./defaults/apache2.conf apache02:/etc/apache2/apache2.conf
+      command: docker cp ./configs/apache2.conf apache02:/etc/apache2/apache2.conf
 
     - name: Copying Apache01 first.tst virtual server config
       copy:
-        src: ./defaults/apache01.conf
+        src: ./configs/apache01.conf
         dest: "{{ apache01_config_path }}/apache01.conf"
 
     - name: Copying Apache02 second.tst virtual server config
       copy:
-        src: ./defaults/apache02.conf
+        src: ./configs/apache02.conf
         dest: "{{ apache02_config_path }}/apache02.conf"
 
     - name: Restart containers
