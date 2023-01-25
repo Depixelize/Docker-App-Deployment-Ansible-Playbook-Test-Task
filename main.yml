@@ -4,6 +4,8 @@
     - ./vars/folders.yml
     - ./vars/network.yml
     - ./vars/domains.yml
+    - ./vars/container-ip.yml
+    - ./vars/docker-images.yml
   become: true
   roles:
     - role: docker-install

@@ -1,0 +1,12 @@
+---
+nginx_ip: "10.0.0.2"
+apache01_ip: "10.0.0.3"
+apache02_ip: "10.0.0.4"
+nginx_exporter_ip: "10.0.0.5"
+mysql_ip: "10.0.0.6"
+fluentd_ip: "10.0.0.7"
+prometheus-mysql-exporter_ip: "10.0.0.8"
+node-exporter_ip: "10.0.0.9"
+prometheus_ip: "10.0.0.10"
+grafana_ip: "10.0.0.11"
+cadvisor_ip: "10.0.0.12"
