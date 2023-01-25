@@ -1,5 +1,6 @@
 ---
-first.tst
-second.tst
-prometheus.tst
-grafana.tst
+domains:
+- 127.0.0.1 first.tst
+- 127.0.0.1 second.tst
+- 127.0.0.1 prometheus.tst
+- 127.0.0.1 grafana.tst
