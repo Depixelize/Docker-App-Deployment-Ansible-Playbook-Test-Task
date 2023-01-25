@@ -88,7 +88,7 @@
         query: |
           CREATE TABLE IF NOT EXISTS log_table (
             remote_addr VARCHAR(45) NOT NULL,
-            remote_user VARCHAR(255) NOT NULL,
+            hostname VARCHAR(255) NOT NULL,
             time_local VARCHAR(255) NOT NULL,
             request VARCHAR(255) NOT NULL,
             status VARCHAR(255) NOT NULL,
