@@ -13,7 +13,7 @@
     restart_policy: always
     networks:
       - name: custom_network
-        ipv4_address: "{{ node-exporter_ip }}"
+        ipv4_address: "{{ nodeexporter_ip }}"
     volumes:
       - "/proc:/host/proc"
       - "/sys:/host/sys"
