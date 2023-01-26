@@ -15,7 +15,7 @@
       - "24224:24224"
     networks:
       - name: custom_network
-        ipv4_address: 10.0.0.7
+        ipv4_address: "{{ fluentd_ip }}"
     volumes:
       - "/srv/fluentd/conf:/fluentd/etc"
       - "/srv/nginx/logs:/fluentd/log"
