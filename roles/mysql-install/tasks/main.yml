@@ -24,7 +24,7 @@
       MYSQL_ROOT_PASSWORD: very_secret
 
 - name: Wait for database to be available
-  shell: docker run --rm --link mysql:mysql mysql sh -c 'mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"very_secret" || true'
+  shell: docker run --rm --link {{ mysql_image }} mysql sh -c 'mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"very_secret" || true'
   register: result
   until: result.stderr.find("Can't connect to MySQL") == -1
   retries: 10
