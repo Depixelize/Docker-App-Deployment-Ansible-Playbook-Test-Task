@@ -23,12 +23,20 @@
     env:
       MYSQL_ROOT_PASSWORD: very_secret
 
-- name: Wait for database to be available
-  shell: docker run --rm --link {{ mysql_image }} mysql sh -c 'mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"very_secret" || true'
-  register: result
-  until: result.stderr.find("Can't connect to MySQL") == -1
-  retries: 10
-  delay: 3
+- name: Wait for MySQL to become ready in Docker
+  hosts: localhost
+  tasks:
+    - name: Inspect MySQL logs
+      command: docker logs mysql
+      register: log_output
+      until: log_output.stdout.find('mysqld: ready for connections') != -1
+      retries: 10
+      delay: 5
+      ignore_errors: true
+    - name: Print MySQL log
+      debug:
+        msg: '{{ log_output.stdout }}'
+      when: log_output.stdout
 
 - name: Copy my cnf to mysql container
   command: docker cp ./roles/mysql-install/defaults/my.cnf mysql:/root/
