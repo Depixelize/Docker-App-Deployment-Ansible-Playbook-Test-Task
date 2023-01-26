@@ -10,6 +10,7 @@
     name: fluentd
     image: theasp/fluentd-plugins:all
     state: started
+    restart_policy: always
     ports:
       - "24224:24224"
     networks:
