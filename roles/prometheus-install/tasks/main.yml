@@ -17,6 +17,6 @@
     state: started
     networks:
       - name: custom_network
-        ipv4_address: 10.0.0.10
+        ipv4_address: "{{ prometheus_ip }}"
     volumes:
       - "/srv/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml" 
