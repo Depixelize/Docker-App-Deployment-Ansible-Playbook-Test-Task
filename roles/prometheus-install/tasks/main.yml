@@ -19,5 +19,6 @@
         ipv4_address: 10.0.0.10
     volumes:
       - "/srv/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml"
-- name: Restart containers
-  command: docker restart nginx
+      
+- name: Restart Prometheus container
+  command: docker restart prometheus
