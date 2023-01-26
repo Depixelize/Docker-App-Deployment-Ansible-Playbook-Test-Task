@@ -19,8 +19,8 @@
     volumes:
       - "/srv/grafana/:/tmp/"
 
-- name: Copy Grafana config to grafana container
-  command: docker cp ./roles/grafana-install/defaults/grafana.ini grafana:/etc/grafana/
+#- name: Copy Grafana config to grafana container
+#  command: docker cp ./roles/grafana-install/defaults/grafana.ini grafana:/etc/grafana/
     
-- name: Copy Grafana bd to grafana container
-  command: docker cp ./roles/grafana-install/defaults/grafana.bd grafana:/var/lib/grafana/
+#- name: Copy Grafana bd to grafana container
+#  command: docker cp ./roles/grafana-install/defaults/grafana.bd grafana:/var/lib/grafana/
