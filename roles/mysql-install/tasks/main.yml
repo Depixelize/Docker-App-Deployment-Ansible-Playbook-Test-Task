@@ -10,6 +10,7 @@
     name: mysql
     image: "{{ mysql_image }}"
     state: started
+    restart_policy: always
     ports:
       - "3306:3306"
     networks:
