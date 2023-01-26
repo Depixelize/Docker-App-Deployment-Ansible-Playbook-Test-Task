@@ -10,6 +10,7 @@
     name: prometheus-mysql-exporter
     image: prom/mysqld-exporter
     state: started
+    restart_policy: always
     ports:
       - "9104:9104"
     networks:
