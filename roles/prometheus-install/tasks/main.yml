@@ -13,12 +13,10 @@
   docker_container:
     name: prometheus
     image: prom/prometheus
+    restart_policy: always
     state: started
     networks:
       - name: custom_network
         ipv4_address: 10.0.0.10
     volumes:
-      - "/srv/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml"
-      
-- name: Restart Prometheus container
-  command: docker restart prometheus
+      - "/srv/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml" 
