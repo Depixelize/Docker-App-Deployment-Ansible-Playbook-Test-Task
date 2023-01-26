@@ -15,6 +15,6 @@
       - "9104:9104"
     networks:
       - name: custom_network
-        ipv4_address: "{{ prometheus-mysql-exporter_ip }}"
+        ipv4_address: "{{ prometheusmysqlexporter_ip }}"
     env:
       DATA_SOURCE_NAME: "root:very_secret@tcp(mysql:3306)/"
