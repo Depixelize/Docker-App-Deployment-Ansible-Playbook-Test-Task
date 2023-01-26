@@ -1,0 +1,21 @@
+- name: Pull Prometheus Docker Image
+  docker_image:
+    name: prom/prometheus
+    source: pull
+    state: present
+
+- name: Copying Prometheus config
+  copy:
+    src: ./roles/prometheus-install/defaults/prometheus.yml
+    dest: "/srv/prometheus/conf/prometheus.yml"
+
+- name: Create Prometheus Container
+  docker_container:
+    name: prometheus
+    image: prom/prometheus
+    state: started
+    networks:
+      - name: custom_network
+        ipv4_address: 10.0.0.10
+    volumes:
+      - "/srv/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml"

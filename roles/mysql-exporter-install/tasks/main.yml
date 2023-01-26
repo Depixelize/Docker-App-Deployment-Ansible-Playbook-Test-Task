@@ -1,0 +1,19 @@
+---
+- name: Pull Prometheus Mysql exporter Docker Image
+  docker_image:
+    name: prom/mysqld-exporter
+    source: pull
+    state: present
+
+- name: Install Prometheus Mysql exporter
+  docker_container:
+    name: prometheus-mysql-exporter
+    image: prom/mysqld-exporter
+    state: started
+    ports:
+      - "9104:9104"
+    networks:
+      - name: custom_network
+        ipv4_address: 10.0.0.8
+    env:
+      DATA_SOURCE_NAME: "root:very_secret@tcp(mysql:3306)/"

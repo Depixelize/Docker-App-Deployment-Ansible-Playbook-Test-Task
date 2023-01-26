@@ -1,0 +1,19 @@
+---
+- name: Pull Grafana Docker Image
+  docker_image:
+    name: grafana/grafana
+    source: pull
+    state: present
+
+- name: Create Grafana Container
+  docker_container:
+    name: grafana
+    image: grafana/grafana
+    state: started
+    ports:
+      - "3000:3000"
+    networks:
+      - name: custom_network
+        ipv4_address: 10.0.0.11
+    volumes:
+      - "/srv/grafana/:/tmp/"

@@ -1,0 +1,22 @@
+---
+- name: Pull Nginx-Exporter for Prometheus
+  docker_image:
+    name: nginx/nginx-prometheus-exporter
+    source: pull
+    state: present
+
+- name: Install Nginx Exporter
+  docker_container:
+    name: nginx_exporter
+    image: nginx/nginx-prometheus-exporter
+    state: started
+    restart_policy: always
+    ports:
+      - "9113:9113"
+    networks:
+      - name: custom_network
+        ipv4_address: 10.0.0.5
+    volumes:
+      - "/srv/nginx/conf:/etc/nginx/conf.d"
+    env:
+      SCRAPE_URI: "http://10.0.0.2:8080/metrics"

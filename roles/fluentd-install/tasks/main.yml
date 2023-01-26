@@ -1,0 +1,32 @@
+---
+- name: Pull Fluentd Docker Image
+  docker_image:
+    name: theasp/fluentd-plugins:all
+    source: pull
+    state: present
+
+- name: Create Fluentd Container
+  docker_container:
+    name: fluentd
+    image: theasp/fluentd-plugins:all
+    state: started
+    ports:
+      - "24224:24224"
+    networks:
+      - name: custom_network
+        ipv4_address: 10.0.0.7
+    volumes:
+      - "/srv/fluentd/conf:/fluentd/etc"
+      - "/srv/nginx/logs:/fluentd/log"
+  
+- name: Copying Fluentd config
+  template:
+    src: ./roles/fluentd-install/default/fluent.conf
+    dest: "/srv/fluentd/conf/fluent.conf"
+
+
+- name: Change permissions of /srv/nginx/
+  file:
+    path: /srv/nginx/
+    mode: 0777
+    recurse: yes
