@@ -18,9 +18,20 @@
         ipv4_address: 10.0.0.11
     volumes:
       - "/srv/grafana/:/tmp/"
-
-#- name: Copy Grafana config to grafana container
-#  command: docker cp ./roles/grafana-install/defaults/grafana.ini grafana:/etc/grafana/
     
-#- name: Copy Grafana db to grafana container
-#  command: docker cp ./roles/grafana-install/defaults/grafana.db grafana:/var/lib/grafana/
+- name: Change chmod of file ./roles/grafana-install/defaults/grafana.ini
+  file:
+    path: ./roles/grafana-install/defaults/grafana.ini
+    mode: 0777
+
+- name: Change chmod of file ./roles/grafana-install/defaults/grafana.db
+  file:
+    path: ./roles/grafana-install/defaults/grafana.db
+    mode: 0777
+
+
+- name: Copy Grafana config to grafana container
+  command: docker cp ./roles/grafana-install/defaults/grafana.ini grafana:/etc/grafana/
+    
+- name: Copy Grafana db to grafana container
+  command: docker cp ./roles/grafana-install/defaults/grafana.db grafana:/var/lib/grafana/
