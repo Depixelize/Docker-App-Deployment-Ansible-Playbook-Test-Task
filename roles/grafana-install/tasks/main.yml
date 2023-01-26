@@ -19,17 +19,6 @@
     volumes:
       - "/srv/grafana/:/tmp/"
     
-- name: Change chmod of file ./roles/grafana-install/defaults/grafana.ini
-  file:
-    path: ./roles/grafana-install/defaults/grafana.ini
-    mode: 0777
-
-- name: Change chmod of file ./roles/grafana-install/defaults/grafana.db
-  file:
-    path: ./roles/grafana-install/defaults/grafana.db
-    mode: 0777
-
-
 - name: Copy Grafana config to grafana container
   command: docker cp ./roles/grafana-install/defaults/grafana.ini grafana:/etc/grafana/
     
