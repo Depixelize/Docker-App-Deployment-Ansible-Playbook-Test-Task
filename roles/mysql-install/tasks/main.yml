@@ -25,10 +25,9 @@
       
 - name: Wait for MySQL container to be ready
   wait_for:
-    path: /var/lib/docker/containers/mysql/mysql-json.log
-    state: present
-    search_regex: mysqld: ready for connections
-    delay: 30
+    host: "{{ mysql_ip }}"
+    port: 3306
+    search_regex: "(mysql_native_password|caching_sha2_password)"
 
 - name: Copy my cnf to mysql container
   command: docker cp ./roles/mysql-install/defaults/my.cnf mysql:/root/
