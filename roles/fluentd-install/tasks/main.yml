@@ -22,7 +22,7 @@
   
 - name: Copying Fluentd config
   template:
-    src: ./roles/fluentd-install/default/fluent.conf
+    src: ./roles/fluentd-install/defaults/fluent.conf
     dest: "/srv/fluentd/conf/fluent.conf"
 
 
