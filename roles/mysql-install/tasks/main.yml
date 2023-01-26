@@ -23,15 +23,12 @@
     env:
       MYSQL_ROOT_PASSWORD: very_secret
       
-- name: Wait for MySQL to be ready
+- name: Wait for MySQL container to be ready
   wait_for:
-    path: "docker logs mysql"
-    search_regex: "mysqld: ready for connections"
-    timeout: 60
-  register: mysql_ready
-- debug:
-    msg: "MySQL is ready!"
-  when: mysql_ready.matched
+    path: /var/lib/docker/containers/mysql/mysql-json.log
+    state: present
+    search_regex: mysqld: ready for connections
+    delay: 30
 
 - name: Copy my cnf to mysql container
   command: docker cp ./roles/mysql-install/defaults/my.cnf mysql:/root/
