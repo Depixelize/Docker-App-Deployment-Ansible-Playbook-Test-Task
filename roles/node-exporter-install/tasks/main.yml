@@ -10,6 +10,7 @@
     name: node-exporter
     image: prom/node-exporter
     state: started
+    restart_policy: always
     networks:
       - name: custom_network
         ipv4_address: 10.0.0.9
