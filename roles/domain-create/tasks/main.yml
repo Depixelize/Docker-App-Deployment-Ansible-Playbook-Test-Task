@@ -1,9 +1,7 @@
 ---
 - name: Write domains to /etc/hosts
-  tasks:
-   - name: Configure /etc/hosts
-     lineinfile:
-       dest: /etc/hosts
-       line: "{{ item.ip }} {{ item.hostname }}"
-       state: present
-     with_items: "{{ domains }}"
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ item.ip }} {{ item.hostname }}"
+    state: present
+  with_items: "{{ domains }}"
