@@ -5,6 +5,6 @@
     line: "{{ item }}"
     state: present
     create: true
-    validate: "grep -qxF '{{ item }}' /etc/hosts || echo '{{ item }}' >> /etc/hosts"
+    validate: "grep -qxF '{{ item }}' /etc/hosts || (echo '{{ item }}' >> /etc/hosts)"
   with_items: "{{ domains }}"
   when: domains is defined
